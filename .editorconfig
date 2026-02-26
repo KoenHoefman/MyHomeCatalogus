@@ -1,0 +1,57 @@
+# Top-level settings
+root = true
+
+[*.{asax,ascx,aspx,axaml,c,c++,cc,cginc,compute,cp,cpp,cs,cshtml,css,cu,cuh,cxx,fx,fxh,h,hh,hlsl,hlsli,hlslinc,hpp,htm,html,hxx,inc,inl,ino,ipp,js,jsx,master,mpp,mq4,mq5,mqh,paml,proto,razor,skin,tpp,ts,tsx,usf,ush,vb,xaml,xamlx,xoml}]
+indent_style = tab
+indent_size = tab
+tab_width = 4
+end_of_line = crlf
+insert_final_newline = true
+
+[*.{appxmanifest,axml,build,config,csproj,dbml,discomap,dtd,json,jsproj,lsproj,njsproj,nuspec,proj,props,resjson,resw,resx,StyleCop,targets,tasks,vbproj,xml,xsd}]
+indent_style = tab
+indent_size = tab
+tab_width = 2
+
+[{*.razor,*.cshtml}]
+razor_indent_webgrid_col_definitions = true
+razor_tabs_and_spaces_behavior = tab
+html_allow_single_line_attributes_per_tag = true
+html_tabs_and_spaces_behavior = tab
+
+[*.{cs,vb}]
+#### Naming styles ####
+dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
+dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
+dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i
+
+dotnet_naming_rule.types_should_be_pascal_case.severity = suggestion
+dotnet_naming_rule.types_should_be_pascal_case.symbols = types
+dotnet_naming_rule.types_should_be_pascal_case.style = pascal_case
+
+# Symbol specifications
+dotnet_naming_symbols.interface.applicable_kinds = interface
+dotnet_naming_symbols.interface.applicable_accessibilities = *
+dotnet_naming_style.begins_with_i.required_prefix = I
+dotnet_naming_style.begins_with_i.capitalization = pascal_case
+
+#### .NET Style Rules ####
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_auto_properties = true:silent
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_namespace_match_folder = true:suggestion
+
+[*.cs]
+# Suggestion 1: Keep code blocks clean for parameter-heavy methods
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_constructors = false:silent
+
+# General C# Preferences
+csharp_using_directive_placement = outside_namespace:silent
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_namespace_declarations = block_scoped:silent
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion

@@ -43,9 +43,10 @@ jobs:
         reporter: dotnet-trx
 
     # 3. PUBLISH STEP
+    # Target the host project only. It will automatically bundle the .Client project.
     - name: Publish
-      run: dotnet publish --no-build --configuration Release --output ./publish
-
+      run: dotnet publish MyHomeCatalogus/MyHomeCatalogus/MyHomeCatalogus.csproj --no-build --configuration Release --output ./publish
+      
     # 4. UPLOAD ARTIFACTS
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
