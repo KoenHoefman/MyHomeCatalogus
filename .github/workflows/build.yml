@@ -10,6 +10,11 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write # Required for reporting on PRs
+      
     steps:
     - uses: actions/checkout@v4
     
