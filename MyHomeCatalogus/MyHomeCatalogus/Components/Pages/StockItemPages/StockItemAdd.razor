@@ -1,0 +1,35 @@
+﻿@attribute [Route(RouteConstants.StockItemAddRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Add stock item</PageTitle>
+
+<h2>Stock item</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (StockItem is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ShoppingListBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <AddUpdateForm TItem="StockItem"
+                   EditContext="@EditContext"
+                   OnValidSubmit="AddStockItem"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.StockItemBaseRoute"
+                   FormName="add">
+
+        <StockItemFieldsAddUpdate Model="StockItem"
+                                  Products="@_products"
+                                  StockUnits="@_stockUnits"
+                                  Shelves="@_shelves" />
+
+    </AddUpdateForm>
+}
+
+@code {
+
+}

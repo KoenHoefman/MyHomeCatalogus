@@ -1,0 +1,31 @@
+﻿
+@attribute [Route(RouteConstants.ShelfDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Shelf details</PageTitle>
+
+    <h2>Shelf</h2>
+    <hr />
+
+    <AlertMessage @bind-Message="_message" />
+
+    @if (_shelf is null)
+    {
+        <LoadingGate BackToListRoute="@RouteConstants.ShelfBaseRoute" IsLoading="_message is null" />
+    }
+    else
+    {
+        <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.ShelfBaseRoute, _shelf.Id)"
+                    DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.ShelfBaseRoute, _shelf.Id)"
+                        BackToListRoute="@RouteConstants.ShelfBaseRoute">
+
+                <ShelfFieldsDetail Model="_shelf"></ShelfFieldsDetail>
+
+        </DetailForm>
+
+    }
+
+@code {
+
+}

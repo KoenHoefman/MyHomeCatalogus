@@ -1,0 +1,39 @@
+﻿@attribute [Route(RouteConstants.ProductAddRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Add product</PageTitle>
+
+<h2>Product</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (Product is null)
+    {
+    <LoadingGate BackToListRoute="@RouteConstants.ProductBaseRoute" IsLoading="_message is null" />
+    }
+    else
+    {
+
+        <AddUpdateForm TItem="Product"
+                       EditContext="@EditContext"
+                       OnValidSubmit="AddProduct"
+                       IsProcessing="_isProcessing"
+                       BackToListRoute="@RouteConstants.ProductBaseRoute"
+                       FormName="add">
+
+            <ProductFieldsAddUpdate Model="Product"
+                                    ProductTypes="_productTypes"
+                                    Stores="_stores"
+                                    PurchaseUnits="_purchaseUnits"
+                                    LoadPicture="@LoadPicture"
+                                    LoadBarcode="@LoadBarcode" />
+
+        </AddUpdateForm>
+
+    }
+
+@code {
+
+}

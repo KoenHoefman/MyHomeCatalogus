@@ -1,0 +1,54 @@
+﻿@using MyHomeCatalogus.Interfaces
+@using MyHomeCatalogus.Components.Forms.DataOverviewFilters
+@implements IFilterProvider<ProductThreshold>
+
+<FilterDelayedInput Value="@_productFilter"
+                    ValueChanged="HandleProductChanged"
+                    Placeholder="Filter by product..." />
+
+
+@code {
+    private string _productFilter = string.Empty;
+
+
+    public bool IsActive => !string.IsNullOrWhiteSpace(_productFilter);
+
+    [CascadingParameter]
+    public DataOverviewForm<ProductThreshold>? ParentForm { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        ParentForm?.RegisterFilter(this);
+    }
+
+    public bool Matches(ProductThreshold item)
+    {
+        var matchName = string.IsNullOrWhiteSpace(_productFilter) ||
+                        item.Product!.Name.Contains(_productFilter, StringComparison.OrdinalIgnoreCase);
+
+        return matchName;
+    }
+
+    private async Task HandleProductChanged(string? value)
+    {
+        _productFilter = value ?? string.Empty;
+        await NotifyChanged();
+    }
+
+    private async Task NotifyChanged()
+    {
+        if (ParentForm != null)
+        {
+            await ParentForm.RefreshAsync();
+        }
+    }
+
+    public void Reset()
+    {
+        _productFilter = string.Empty;
+
+        StateHasChanged();
+    }
+
+}

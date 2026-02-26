@@ -1,0 +1,45 @@
+﻿@if (_isVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update item</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>
+                                @_errorMessage
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label">Quantity:</label>
+                        <div>@_shoppingListItem!.Product!.Name</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Quantity:</label>
+                        <input type="number" class="form-control @(!string.IsNullOrEmpty(_errorMessage) ? "is-invalid" : "")"
+                               @bind="_shoppingListItem!.Quantity" min="1" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="UpdateItem">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+
+}

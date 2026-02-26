@@ -1,0 +1,36 @@
+﻿@attribute [Route(RouteConstants.ShoppingListDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove shopping list</PageTitle>
+
+<h2>Shopping list</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_shoppingList is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ShoppingListBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DeleteForm TItem="ShoppingList"
+                Item="_shoppingList"
+                OnValidSubmit="DeleteShoppingList"
+                IsProcessing="_isProcessing"
+                BackToListRoute="@RouteConstants.ShoppingListBaseRoute">
+
+        <DeleteMessage>
+            Are you sure you want to permanently remove the following shopping list?
+        </DeleteMessage>
+        <ChildContent>
+            <ShoppingListFieldsDetail Model="_shoppingList" />
+        </ChildContent>
+
+    </DeleteForm>
+}
+
+@code {
+
+}

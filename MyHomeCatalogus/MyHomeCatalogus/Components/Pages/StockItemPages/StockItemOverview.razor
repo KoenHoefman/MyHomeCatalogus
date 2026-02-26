@@ -1,0 +1,29 @@
+﻿@attribute [Route(RouteConstants.StockItemBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Components.Extensions
+
+@rendermode InteractiveServer
+
+<PageTitle>Product types</PageTitle>
+
+<DataOverviewForm TItem="StockItem"
+                  DataService="StockItemService"
+                  BaseRoute="StockItems"
+                  Title="Stock items"
+                  AddItemText="Add new stock item">
+    <FilterTemplate>
+        <StockItemOverviewFilters />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="StockItem" TProp="string" Property="stockItem => stockItem.Product!.Name" Title="Name" Sortable="true" />
+        <PropertyColumn TGridItem="StockItem" TProp="string" Property="stockItem => stockItem.Shelf!.ToDisplayString()" Title="Location" Sortable="true" />
+        <PropertyColumn TGridItem="StockItem" TProp="int" Property="stockItem => stockItem.Quantity" Title="Quantity" Sortable="true" />
+        <PropertyColumn TGridItem="StockItem" TProp="string" Property="stockItem => stockItem.StockUnit!.Name" Title="Packaging" Sortable="true" />
+    </GridColumns>
+</DataOverviewForm>
+
+@code {
+
+}

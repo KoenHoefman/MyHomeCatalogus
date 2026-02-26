@@ -1,0 +1,53 @@
+﻿@inherits LayoutComponentBase
+
+@inject IHostEnvironment HostEnvironment
+
+<div class="page">
+
+    <div class="sidebar">
+
+        <NavMenu />
+
+    </div>
+
+
+
+    <main>
+
+        <div class="top-row px-4">
+
+            <a href="@RouteConstants.About">About</a>
+
+        </div>
+
+        <article class="content px-4">
+
+            @Body
+
+        </article>
+
+    </main>
+
+    <ToastNotification @rendermode="InteractiveAuto" />
+
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    <div class="d-flex align-items-center w-100">
+        <div class="me-auto d-flex align-items-center">
+            <span>
+                <i class="bi bi-exclamation-triangle-fill me-2 pulse-icon"></i>
+                <strong>System Error:</strong> The connection to the server was lost.
+            </span>
+            <a href="" class="reload btn btn-sm btn-outline-danger ms-3" onclick="this.querySelector('.spinner-border').classList.remove('d-none')">
+                <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
+                Reload Page
+            </a>
+        </div>
+
+        <i class="bi bi-x-lg dismiss"></i>
+    </div>
+</div>
+
+@code {
+}

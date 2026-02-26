@@ -1,0 +1,63 @@
+﻿@typeparam TItem
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card form-container">
+            <div class="card-header">
+                <p class="text-danger fw-bold mb-4">
+                    @(DeleteMessage ?? _defaultDeleteMessage)
+                    <br />
+                    <br />
+                    This action cannot be undone.
+                </p>
+            </div>
+
+            <div class="card-body">
+                <fieldset disabled="@IsProcessing">
+                    <dl class="row mb-0">
+                        @ChildContent
+                    </dl>
+                </fieldset>
+            </div>
+
+            <EditForm method="post"
+                      Model="@Item"
+                      OnValidSubmit="@OnValidSubmit"
+                      FormName="@FormName"
+                      Enhance>
+                <div class="card-footer">
+                    <div class="form-actions">
+
+                        <button type="submit"
+                                class="btn btn-danger"
+                                disabled="@(Item is null || IsProcessing)">
+
+                            @if (IsProcessing)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span>Deleting...</span>
+                            }
+                            else
+                            {
+                                <span>Delete</span>
+                            }
+                        </button>
+
+                        <a class="btn btn-secondary @(IsProcessing ? "disabled" : "")" 
+                           href="@(IsProcessing ? null : BackToListRoute)"
+                           aria-disabled="@IsProcessing" 
+                           role="button">
+                            Back to List
+                        </a>                        
+                    </div>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private RenderFragment _defaultDeleteMessage = @<span>Are you sure?</span>;
+}

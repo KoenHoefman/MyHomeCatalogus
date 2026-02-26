@@ -1,0 +1,38 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@attribute [Route(RouteConstants.ShelfDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove shelf</PageTitle>
+
+<h2>Shelf</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_shelf is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ShelfBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DeleteForm TItem="Shelf"
+                Item="_shelf"
+                OnValidSubmit="DeleteShelf"
+                IsProcessing="_isProcessing"
+                BackToListRoute="@RouteConstants.ShelfBaseRoute">
+
+        <DeleteMessage>
+            Are you sure you want to permanently remove the following shelf?
+        </DeleteMessage>
+        <ChildContent>
+            <ShelfFieldsDetail Model="_shelf" />
+        </ChildContent>
+
+    </DeleteForm>
+
+}
+
+@code {
+
+}

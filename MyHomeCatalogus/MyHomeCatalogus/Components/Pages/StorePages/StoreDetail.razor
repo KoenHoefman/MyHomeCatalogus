@@ -1,0 +1,31 @@
+﻿@attribute [Route(RouteConstants.StoreDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Store details</PageTitle>
+
+<h2>Store</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_store is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.StoreBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.StoreBaseRoute, _store.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.StoreBaseRoute, _store.Id)"
+                BackToListRoute="@RouteConstants.StoreBaseRoute">
+
+        <StoreFieldsDetail Model="_store"></StoreFieldsDetail>
+
+    </DetailForm>
+
+}
+
+@code {
+
+}

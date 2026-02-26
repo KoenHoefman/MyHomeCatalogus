@@ -1,0 +1,10 @@
+﻿<DetailDeleteFormRow>
+    <LabelContent>Name</LabelContent>
+    <ValueContent>@Model.Name</ValueContent>
+</DetailDeleteFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required PurchaseUnit Model { get; set; }
+
+}

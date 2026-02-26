@@ -1,0 +1,39 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@attribute [Route(RouteConstants.StockItemDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove stock item</PageTitle>
+
+<h2>Stock item</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_stockItem is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.StockItemBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+
+    <DeleteForm TItem="StockItem"
+                Item="_stockItem"
+                OnValidSubmit="DeleteStockItem"
+                IsProcessing="_isProcessing"
+                BackToListRoute="@RouteConstants.StockItemBaseRoute">
+
+        <DeleteMessage>
+            Are you sure you want to permanently remove the following stock item?
+        </DeleteMessage>
+        <ChildContent>
+            <StockItemFieldsDetail Model="_stockItem" />
+        </ChildContent>
+
+    </DeleteForm>
+
+}
+
+@code {
+
+}

@@ -1,0 +1,64 @@
+﻿@if (Model.Id != 0)
+{
+    <input type="hidden" name="Model.Id" value="@Model.Id" />
+}
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="storeid" class="form-label">Store (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputSelect id="storeid" @bind-Value="Model.StoreId" class="form-select" disabled="@IsStoreDisabled" aria-required="@(!IsStoreDisabled)">
+            @foreach (var store in Stores)
+            {
+                <option value="@store.Id">@store.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.StoreId" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="iscompleted" class="form-label">Completed:</label>
+    </LabelContent>
+    <InputContent>
+        <InputCheckbox id="iscompleted" @bind-Value="Model.IsCompleted" class="form-check-input" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="datecreated" class="form-label">Creation date:</label>
+    </LabelContent>
+    <InputContent>
+        <div class="input-group">
+            <InputDate @bind-Value="Model.DateCreated"
+                       id="datecreated"
+                       class="form-control" />
+
+            @if (Model.DateCreated.HasValue)
+            {
+                <button class="btn btn-outline-secondary"
+                        type="button"
+                        @onclick="() => Model.DateCreated = null"
+                        title="Clear date">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            }
+        </div>
+    </InputContent>
+</AddUpdateFormRow>
+
+
+
+@code {
+    [Parameter, EditorRequired]
+    public required ShoppingList Model { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<Store> Stores { get; set; }
+
+    [Parameter]
+    public bool IsStoreDisabled { get; set; }
+}

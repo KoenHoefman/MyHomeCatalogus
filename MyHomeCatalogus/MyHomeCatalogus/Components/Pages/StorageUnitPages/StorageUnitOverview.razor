@@ -1,0 +1,31 @@
+﻿@attribute [Route(RouteConstants.StorageUnitBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Shared.Domain
+
+@rendermode InteractiveServer
+
+<PageTitle>Rooms</PageTitle>
+
+<AlertMessage @bind-Message="_message" />
+
+<DataOverviewForm TItem="StorageUnit"
+              DataService="StorageUnitService"
+              BaseRoute=@RouteConstants.StorageUnitBaseRoute
+              Title="Storage units"
+              AddItemText="Add new storage unit">
+    
+    <FilterTemplate>
+        <StorageUnitOverviewFilters Rooms="_rooms"/>
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="StorageUnit" TProp="string" Property="storageUnit => storageUnit.Name" Title="Name" Sortable="true" />
+        <PropertyColumn TGridItem="StorageUnit" TProp="string" Property="storageUnit => storageUnit.Description ?? string.Empty" Title="Description" Sortable="true" />
+        <PropertyColumn TGridItem="StorageUnit" TProp="string" Property="storageUnit => storageUnit.Room!.Name" Title="Room" Sortable="true" />
+    </GridColumns>
+</DataOverviewForm>
+
+@code {
+
+}

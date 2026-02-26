@@ -1,0 +1,131 @@
+﻿@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Shared.Interfaces
+
+@typeparam TItem where TItem : class, IEntity
+
+<AlertMessage @bind-Message="_errorMessage" />
+
+@if (_errorMessage is not null)
+{
+    <div class="mb-3">
+        <button class="btn btn-outline-primary btn-sm" @onclick="LoadDataAsync">
+            <i class="bi bi-arrow-clockwise me-1"></i> Click here to retry
+        </button>
+    </div>
+}
+else if (_items is null)
+{
+    <div class="d-flex align-items-center text-secondary">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        <span>Loading data...</span>
+    </div>
+}
+else
+{
+    <div class="card shadow-lg rounded-xl">
+        <div class="card-header bg-white p-4 border-b">
+            <h3 class="text-2xl font-semibold text-gray-800">@Title</h3>
+        </div>
+
+        <div class="p-4">
+            <a href="@RouteConstants.GetAddRoute(BaseRoute)" class="btn btn-primary" role="button">@AddItemText</a>
+        </div>
+
+        <div class="card-body p-4">
+            
+            <CascadingValue Value="this" IsFixed="true">
+                @if (FilterTemplate is not null)
+                {
+                    <div class="col d-flex gap-2">
+                        @FilterTemplate
+                        
+                        @if (_activeFilter is not null)
+                        {
+                            <button class="btn btn-outline-secondary btn-sm @(HasActiveFilters ? "" : "disabled")" 
+                                    @onclick="ClearFiltersAsync" 
+                                    title="Clear Filters">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        }
+                    </div>
+                }
+                <div class="position-relative" style="height:500px;">
+
+                    @if (_isLoading)
+                    {
+                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center grid-overlay fade-in">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <div class="mt-2 fw-bold text-primary">Refreshing...</div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="grid-container @(_isLoading ? "grid-loading-blur" : "")">
+                    
+                        @if (FilteredItems is not null && !FilteredItems.Any() && !_isLoading)
+                        {
+                            <div class="py-5 text-center text-secondary border rounded-3 bg-light opacity-75">
+                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                                <p class="fs-5 fw-medium">No records found.</p>
+                                <p class="small">Try adjusting your search or add a new entry.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <QuickGrid Class="table table-hover" Virtualize="true" Items="@FilteredItems" ItemSize="30">
+
+                                @if (EffectiveGridColumns is not null)
+                                {
+                                    @EffectiveGridColumns
+                                }
+                                else
+                                {
+                                    <TemplateColumn Title="Configuration Error">
+                                        <p class="text-red-500 font-bold p-2">ERROR: You must define GridColumns or provide NameAccessor and DescriptionAccessor for the default template to work.</p>
+                                    </TemplateColumn>
+                                }
+
+                                @if (ShowView || ShowEdit || ShowDelete || CustomActions is not null)
+                                {
+                                    <TemplateColumn Context="item" Title="Actions" Align="Align.Center">
+                                        <div class="btn-group btn-group-sm" role="group">
+
+                                            @if (ShowView)
+                                            {
+                                                <a class="btn btn-outline-info" title="View" href="@RouteConstants.GetDetailRoute(BaseRoute, item.Id)">
+                                                    <i class="bi bi-eye-fill fs-5"></i>
+                                                </a>
+                                            }
+
+                                            @if (ShowEdit)
+                                            {
+                                                <a class="btn btn-outline-warning" title="Edit" href="@RouteConstants.GetEditRoute(BaseRoute, item.Id)">
+                                                    <i class="bi bi-pencil-square fs-5"></i>
+                                                </a>
+                                            }
+
+                                            @if (ShowDelete)
+                                            {
+                                                <a class="btn btn-outline-danger" title="Delete" href="@RouteConstants.GetDeleteRoute(BaseRoute, item.Id)">
+                                                    <i class="bi bi-trash-fill fs-5"></i>
+                                                </a>
+                                            }
+
+                                            @if (CustomActions is not null)
+                                            {
+                                                @CustomActions(item)
+                                            }
+                                        </div>
+                                    </TemplateColumn>
+                                }
+
+                            </QuickGrid>
+                        }
+                    </div>
+                </div>
+            </CascadingValue>
+        </div>
+    </div>
+}
+

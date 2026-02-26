@@ -1,0 +1,31 @@
+﻿.grid-overlay {
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 1050;
+    border-radius: 0.5rem;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.grid-container {
+    height: 100%;
+    overflow: auto;
+    transition: filter 0.3s ease-in-out;
+}
+
+.grid-loading-blur {
+    filter: blur(2px);
+    pointer-events: none; 
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

@@ -1,0 +1,84 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">MyHomeCatalogus</a>
+    </div>
+</div>
+
+<input name="navbartoggler" type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill me-3 fs-4" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href=@RouteConstants.ProductBaseRoute>
+                <span class="bi bi-box-seam me-3 fs-4" aria-hidden="true"></span> Products
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href=@RouteConstants.ShoppingListBaseRoute>
+                <span class="bi bi-cart3 me-3 fs-4" aria-hidden="true"></span> Shopping lists
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#stockdatacollapse" aria-expanded="false">
+                <span class="bi bi-database-fill-gear me-3 fs-4" aria-hidden="true"></span>
+                <span class="flex-grow-1">Stock Data</span>
+                <span class="bi bi-chevron-down chevron-icon" aria-hidden="true"></span>
+            </a>
+            <div class="collapse" id="stockdatacollapse">
+                <NavLink class="nav-link sub-nav-link" href=@RouteConstants.StockItemBaseRoute>
+                    <span class="bi bi-box-fill" aria-hidden="true"></span> Stock items
+                </NavLink>
+                <NavLink class="nav-link sub-nav-link" href=@RouteConstants.ProductThresholdBaseRoute>
+                    <span class="bi bi-exclamation-triangle-fill" aria-hidden="true"></span> Product thresholds
+                </NavLink>
+            </div>
+        </div>
+
+        <div class="nav-item px-3">
+            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#masterdatacollapse" aria-expanded="false">
+                <span class="bi bi-layers-half me-3 fs-4" aria-hidden="true"></span>
+                <span class="flex-grow-1">Master Data</span>
+                <span class="bi bi-chevron-down chevron-icon" aria-hidden="true"></span>
+            </a>
+            <div class="collapse" id="masterdatacollapse">
+                <NavLink class="nav-link sub-nav-link" href=@RouteConstants.ProductTypeBaseRoute>
+                    <span class="bi bi-tag-fill" aria-hidden="true"></span> Product Types
+                </NavLink>
+                <NavLink class="nav-link sub-nav-link" href=@RouteConstants.PurchaseUnitBaseRoute>
+                    <span class="bi bi-pci-card" aria-hidden="true"></span> Purchase Units
+                </NavLink>
+                <NavLink class="nav-link sub-nav-link" href=@RouteConstants.StockUnitBaseRoute>
+                    <span class="bi bi-unity" aria-hidden="true"></span> Stock Units
+                </NavLink>
+                <NavLink class="nav-link sub-nav-link" href=@RouteConstants.StoreBaseRoute>
+                    <span class="bi bi-shop" aria-hidden="true"></span> Stores
+                </NavLink>
+
+                <a class="nav-link collapsed sub-nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#stocklocationcollapse" aria-expanded="false">
+                    <span class="bi bi-geo-alt-fill" aria-hidden="true"></span>
+                    <span class="flex-grow-1">Stock Locations</span>
+                    <span class="bi bi-chevron-down chevron-icon" aria-hidden="true"></span>
+                </a>
+                <div class="collapse" id="stocklocationcollapse">
+                    <NavLink class="nav-link nested-nav-link" href=@RouteConstants.RoomBaseRoute>
+                        <span class="bi bi-door-open-fill" aria-hidden="true"></span> Rooms
+                    </NavLink>
+                    <NavLink class="nav-link nested-nav-link" href=@RouteConstants.StorageUnitBaseRoute>
+                        <span class="bi bi-archive-fill" aria-hidden="true"></span> Storage Units
+                    </NavLink>
+                    <NavLink class="nav-link nested-nav-link" href=@RouteConstants.ShelfBaseRoute>
+                        <span class="bi bi-hdd-stack-fill" aria-hidden="true"></span> Shelves
+                    </NavLink>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>

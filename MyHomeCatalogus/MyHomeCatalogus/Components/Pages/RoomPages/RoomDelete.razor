@@ -1,0 +1,39 @@
+﻿@attribute [Route(RouteConstants.RoomDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove room</PageTitle>
+
+<h2>Room</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_room is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.RoomBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DeleteForm TItem="Room"
+                Item="_room"
+                OnValidSubmit="DeleteRoom"
+                IsProcessing="_isProcessing"
+                BackToListRoute="@RouteConstants.RoomBaseRoute">
+
+        <DeleteMessage>
+            Are you sure you want to permanently remove the following room?
+            <br />
+            This will also remove all the related storage units and shelves.
+        </DeleteMessage>
+        <ChildContent>
+            <RoomFieldsDetail Model="_room"></RoomFieldsDetail>
+        </ChildContent>
+
+    </DeleteForm>
+
+}
+
+@code {
+
+}

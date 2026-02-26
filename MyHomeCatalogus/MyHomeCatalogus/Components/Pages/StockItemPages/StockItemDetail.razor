@@ -1,0 +1,29 @@
+﻿@attribute [Route(RouteConstants.StockItemDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Stock item details</PageTitle>
+
+<h2>Stock item</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_stockItem is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.StockItemBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.StockItemBaseRoute, _stockItem.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.StockItemBaseRoute, _stockItem.Id)"
+                BackToListRoute="@RouteConstants.StockItemBaseRoute">
+
+        <StockItemFieldsDetail Model="_stockItem"></StockItemFieldsDetail>
+
+    </DetailForm>
+}
+
+@code {
+
+}

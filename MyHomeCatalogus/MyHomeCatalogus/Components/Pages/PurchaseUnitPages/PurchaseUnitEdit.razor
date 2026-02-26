@@ -1,0 +1,35 @@
+﻿@attribute [Route(RouteConstants.PurchaseUnitEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit purchase unit</PageTitle>
+
+
+<h2>Purchase unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (PurchaseUnit is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+
+    <AddUpdateForm TItem="PurchaseUnit"
+                   EditContext="@EditContext"
+                   OnValidSubmit="UpdatePurchaseUnit"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute"
+                   FormName="edit">
+
+        <PurchaseUnitFieldsAddUpdate Model="PurchaseUnit" />
+
+    </AddUpdateForm>
+
+}
+
+@code {
+
+}

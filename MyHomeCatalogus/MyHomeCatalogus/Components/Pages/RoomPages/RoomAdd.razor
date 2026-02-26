@@ -1,0 +1,33 @@
+﻿@attribute [Route(RouteConstants.RoomAddRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Add room</PageTitle>
+
+<h2>Room</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (Room is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <AddUpdateForm TItem="Room"
+                   EditContext="@EditContext"
+                   OnValidSubmit="AddRoom"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.RoomBaseRoute"
+                   FormName="add">
+
+        <RoomFieldsAddUpdate Model="Room" />
+
+    </AddUpdateForm>
+
+}
+
+@code {
+
+}

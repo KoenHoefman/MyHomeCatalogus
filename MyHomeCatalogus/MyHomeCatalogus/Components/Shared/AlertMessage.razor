@@ -1,0 +1,24 @@
+﻿
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @Message
+        <button type="button" class="btn-close" @onclick="CloseAlert" aria-label="Close"></button>
+    </div>
+}
+
+@code {
+    [Parameter] public string? Message { get; set; }
+
+    // This naming convention ({PARAMETER NAME}Changed) enables @bind-Message
+    // More info: https://learn.microsoft.com/en-us/aspnet/core/blazor/components/data-binding?view=aspnetcore-8.0#binding-with-component-parameters
+
+    [Parameter] 
+    public EventCallback<string?> MessageChanged { get; set; }
+
+    private async Task CloseAlert()
+    {
+        Message = null;
+        await MessageChanged.InvokeAsync(Message);
+    }
+}

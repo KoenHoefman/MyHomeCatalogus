@@ -1,0 +1,54 @@
+﻿@attribute [Route(RouteConstants.ShoppingListBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Components.Extensions
+
+@rendermode InteractiveServer
+
+<PageTitle>Shopping list</PageTitle>
+
+<AlertMessage @bind-Message="_message" />
+
+<DataOverviewForm TItem="ShoppingList"
+                  @ref="_overviewForm"
+                  DataService="ShoppingListService"
+                  BaseRoute=@RouteConstants.ShoppingListBaseRoute
+                  Title="Shopping lists"
+                  AddItemText="Add new shopping list">
+
+    <FilterTemplate>
+        <ShoppingListOverviewFilters Stores="_stores" />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="ShoppingList" TProp="string" Property="shoppinglist => shoppinglist.Store!.Name" Title="Store" Sortable="true" />
+        <TemplateColumn TGridItem="ShoppingList" Context="shoppinglist" Title="Date created" Sortable="true">
+            @(shoppinglist.DateCreated.HasValue? shoppinglist.DateCreated.Value.ToShortDateString() : string.Empty)
+        </TemplateColumn>
+        <TemplateColumn TGridItem="ShoppingList" Context="shoppinglist" Title="Completed" Sortable="true" Align="Align.Center">
+            @if (shoppinglist.IsCompleted)
+            {
+                <i class="bi bi-check-lg text-success fs-5 fw-bold" aria-label="Completed"></i>
+            }
+            else
+            {
+                <i class="bi bi-x-lg text-danger fs-5 fw-bold" aria-label="Not completed"></i>
+            }
+        </TemplateColumn>
+    </GridColumns>
+
+    <CustomActions Context="shoppinglist">
+        <button class="btn btn-outline-success ms-4"
+                title="Add Product"
+                @onclick="() => _addProductModal.OpenModal(shoppinglist)">
+            <i class="bi bi-plus-lg fs-5 fw-bold"></i>
+        </button>
+    </CustomActions>
+
+</DataOverviewForm>
+
+<AddProductModal @ref="_addProductModal" OnSuccess="RefreshData" />
+
+@code {
+
+}

@@ -1,0 +1,34 @@
+﻿@attribute [Route(RouteConstants.StorageUnitEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit storage unit</PageTitle>
+
+<h2>Storage unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (StorageUnit is null)
+    {
+    <LoadingGate BackToListRoute="@RouteConstants.StorageUnitBaseRoute" IsLoading="_message is null" />
+    }
+    else
+    {
+        <AddUpdateForm TItem="StorageUnit"
+                       EditContext="@EditContext"
+                       OnValidSubmit="UpdateStorageUnit"
+                       IsProcessing="_isProcessing"
+                       BackToListRoute="@RouteConstants.StorageUnitBaseRoute"
+                       FormName="edit">
+
+            <StorageUnitFieldsAddUpdate Model="StorageUnit"
+                                        Rooms="_rooms" />
+
+        </AddUpdateForm>
+
+    }
+
+@code {
+
+}

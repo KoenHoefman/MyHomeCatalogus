@@ -1,0 +1,21 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+<DetailDeleteFormRow>
+    <LabelContent>Name</LabelContent>
+    <ValueContent>@Model.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Description</LabelContent>
+    <ValueContent>@Model.Description</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Storage unit</LabelContent>
+    <ValueContent>@Model.StorageUnit!.ToDisplayString()</ValueContent>
+</DetailDeleteFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Shelf Model { get; set; }
+
+}

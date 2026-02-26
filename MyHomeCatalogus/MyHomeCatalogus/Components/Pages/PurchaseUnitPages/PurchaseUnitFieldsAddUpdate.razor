@@ -1,0 +1,20 @@
+﻿@if (Model.Id != 0)
+{
+    <input type="hidden" name="Model.Id" value="@Model.Id" />
+}
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="name" class="form-label">Name (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputText id="name" @bind-Value="Model.Name" class="form-control" aria-required="true" />
+        <ValidationMessage For="() => Model.Name" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required PurchaseUnit Model { get; set; }
+
+}

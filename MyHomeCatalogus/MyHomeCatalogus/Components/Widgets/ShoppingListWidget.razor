@@ -1,0 +1,32 @@
+﻿<Widget Title="Active shopping lists">
+    <HeaderContent>
+        @if (Data is not null)
+        {
+            if (Data.Count() == 1)
+            {
+            <span class="fw-bold">There is currently @Data.Count() shoppinglist active</span>
+            }
+            else
+            {
+                <span class="fw-bold">There are currently @Data.Count() shoppinglists active</span>
+            }
+        }
+    </HeaderContent>
+    <ChildContent>
+        @if (Data is not null)
+        {
+            <ul class="list-group">
+
+                @foreach (var item in Data)
+                {
+                    <li class="list-group-item border-0">
+
+                        @item.ShoppingListName
+                        <span class="badge rounded-pill bg-dark text-white">@item.ItemsCount</span>
+                    </li>
+                }
+            </ul>
+        }       
+    </ChildContent>
+</Widget>
+

@@ -1,0 +1,42 @@
+﻿@{
+    var collapseId = $"widget_{Id}";
+}
+
+<div class="card shadow-sm my-4" style="height: 100%;">
+    <div class="card-header d-flex align-items-center">
+        
+        <button class="btn btn-sm btn-light border-0 me-3"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#@collapseId"
+                aria-expanded="true"
+                aria-label="Toggle Widget">
+            <i class="bi bi-chevron-down fs-5"></i>
+        </button>
+        
+        <div>
+        <h5 class="mb-0">@Title</h5>
+
+        @if (HeaderContent != null)
+        {
+            <div class="text-muted small">
+                @HeaderContent
+            </div>
+        }
+        </div>
+    </div>
+
+    <div class="collapse show" id="@collapseId">
+        <div class="card-body">
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required string Title { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+}

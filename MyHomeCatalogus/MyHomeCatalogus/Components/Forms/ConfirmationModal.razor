@@ -1,0 +1,31 @@
+﻿@typeparam TItem
+
+@if (_isVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirm
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="mb-0 fs-5">@Message</p>
+                    @if (!ActionCanBeReversed)
+                    {
+                        <small class="text-muted">This action cannot be undone.</small>
+                    }
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-danger px-4" @onclick="Confirm">@AcceptButtonText</button>
+                    <button type="button" class="btn btn-light" @onclick="Close">@CancelButtonText</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+}

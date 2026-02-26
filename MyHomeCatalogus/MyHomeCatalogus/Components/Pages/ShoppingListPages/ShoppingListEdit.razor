@@ -1,0 +1,88 @@
+﻿@using Microsoft.AspNetCore.Components.QuickGrid
+@attribute [Route(RouteConstants.ShoppingListEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit shopping list</PageTitle>
+
+<h2>Shopping list</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (ShoppingList is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ShoppingListBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <AddUpdateForm TItem="ShoppingList"
+                   EditContext="@EditContext"
+                   OnValidSubmit="UpdateShoppingList"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.ShoppingListBaseRoute"
+                   FormName="edit">
+
+        <ShoppingListFieldsAddUpdate Model="ShoppingList"
+                                     Stores="Stores"
+                                     IsStoreDisabled="@IsStoreLocked" />
+
+        @if (IsStoreLocked)
+        {
+            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <div>
+                    Store cannot be changed when there are items in the list.
+                </div>
+            </div>
+@*             <div class="form-text text-muted mb-3">
+                <i class="bi bi-info-circle"></i> Store cannot be changed when there are items in the list.
+            </div>
+ *@
+
+        }
+
+    </AddUpdateForm>
+
+    <div class="card-body p-4">
+        <div class="p-4">
+            <button class="btn btn-primary"
+                    title="Add product to list"
+                    @onclick="() => _addProductModal.OpenModal(ShoppingList)">
+                Add product to list
+            </button>
+        </div>
+
+        <div style="height:500px;overflow-y:scroll">
+            <QuickGrid @ref="_grid" Class="table" Virtualize="true" Items="@_items" ItemSize="30">
+                <PropertyColumn TGridItem="ShoppingListItem" TProp="string" Property="s => s.Product!.Name" Title="Product" />
+                <PropertyColumn TGridItem="ShoppingListItem" TProp="int" Property="s => s.Quantity" Title="Quantity" />
+
+                <TemplateColumn Context="item" Title="Actions" Align="Align.Center">
+                    <button class="btn btn-outline-warning"
+                            title="Edit"
+                            @onclick="() => _editItemModal.OpenModal(item)">
+                        <i class="bi bi-pencil-square fs-5 fw-bold"></i>
+                    </button>
+                    <button class="btn btn-outline-danger"
+                            title="Delete"
+                            @onclick="() => _deleteModal.Show(item)">
+                        <i class="bi bi-trash-fill fs-5 fw-bold"></i>
+                    </button>
+                </TemplateColumn>
+
+            </QuickGrid>
+        </div>
+    </div>
+
+    <AddProductModal @ref="_addProductModal" OnSuccess="RefreshData" />
+    <EditItemModal @ref="_editItemModal" OnSuccess="RefreshData" />
+    <ConfirmationModal TItem="ShoppingListItem"
+                       @ref="_deleteModal"
+                       OnConfirmed="HandleDelete"
+                       Message="Remove this item from your shopping list?" />
+}
+
+@code {
+
+}

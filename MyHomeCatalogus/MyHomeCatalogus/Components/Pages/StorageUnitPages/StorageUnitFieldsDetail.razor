@@ -1,0 +1,23 @@
+﻿
+
+
+<DetailDeleteFormRow>
+    <LabelContent>Name</LabelContent>
+    <ValueContent>@Model.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Description</LabelContent>
+    <ValueContent>@Model.Description</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Room</LabelContent>
+    <ValueContent>@Model.Room!.Name</ValueContent>
+</DetailDeleteFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required StorageUnit Model { get; set; }
+
+}

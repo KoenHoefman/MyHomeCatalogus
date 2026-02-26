@@ -1,0 +1,59 @@
+﻿<DetailDeleteFormRow>
+    <LabelContent>Name</LabelContent>
+    <ValueContent>@Model.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Description</LabelContent>
+    <ValueContent>@Model.Description</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Product type</LabelContent>
+    <ValueContent>@Model.ProductType!.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Store</LabelContent>
+    <ValueContent>@Model.Store!.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Purchase unit</LabelContent>
+    <ValueContent>@Model.PurchaseUnit!.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Picture</LabelContent>
+    <ValueContent>
+        @if (Model.Picture is null)
+        {
+            <div class="form-display-value">No picture</div>
+        }
+        else
+        {
+            <img class="image-thumbnail mt-2" src="@($"data:{Model.PictureMimeType};base64,{Convert.ToBase64String(Model.Picture)}")" alt="The picture"/>
+
+        }
+    </ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Barcode</LabelContent>
+    <ValueContent>
+        @if (Model.Barcode is null)
+        {
+            <div class="form-display-value">No barcode</div>
+        }
+        else
+        {
+            <img class="image-thumbnail mt-2" src="@($"data:{Model.BarcodeMimeType};base64,{Convert.ToBase64String(Model.Barcode)}")" alt="The barcode"/>
+        }
+    </ValueContent>
+</DetailDeleteFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Product Model { get; set; }
+
+}

@@ -1,0 +1,106 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using System.Linq.Expressions
+@using System.Reflection
+
+<div class="counting-textarea-container">
+    <textarea id="Id"
+              @bind="CurrentValue"
+              @oninput="HandleInput"
+              class="form-control @CustomCssClass"
+              rows="@Rows"
+              maxlength="@_effectiveMaxLength"
+              placeholder="@Placeholder"></textarea>
+
+    <div class="d-flex justify-content-between mt-1">
+        <div>
+            <ValidationMessage For="@For" class="text-danger mb-0" />
+        </div>
+        <div class="form-text @GetCountColor()">
+            @(Value?.Length ?? 0)/@_effectiveMaxLength chars
+        </div>
+    </div>
+</div>
+
+@code {
+    private int _effectiveMaxLength;
+
+    [Parameter, EditorRequired] public string? Id { get; set; }
+
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// This parameter is used for the ValidationMessage and to determine the maximum length through reflection.
+    /// </summary>
+    [Parameter] public Expression<Func<string?>>? For { get; set; }
+
+    /// <summary>
+    /// Maximum length of the textarea.
+    /// If not provided, reflection will be used to determine the <see cref="StringLengthAttribute"/> or <see cref="MaxLengthAttribute"/>.
+    /// If none is found, the default maximum length is set to 200 characters.
+    /// </summary>
+    [Parameter] public int? MaxLength { get; set; }
+
+    /// <summary>
+    /// Numbers of row visible in the textarea. Default 3 rows.
+    /// </summary>
+    [Parameter] public int Rows { get; set; } = 3;
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter] public string? CustomCssClass { get; set; }
+
+    private string? CurrentValue
+    {
+        get => Value;
+        set => ValueChanged.InvokeAsync(value);
+    }
+
+    protected override void OnInitialized()
+    {
+        _effectiveMaxLength = MaxLength ?? GetMaxLengthFromAttribute() ?? 200;
+    }
+
+    private int? GetMaxLengthFromAttribute()
+    {
+        if (For?.Body is MemberExpression memberExpression)
+        {
+            var prop = memberExpression.Member as PropertyInfo;
+
+            var strLenAttr = prop?.GetCustomAttribute<StringLengthAttribute>();
+            if (strLenAttr is not null)
+            {
+                return strLenAttr.MaximumLength;
+            }
+
+            var maxLenAttr = prop?.GetCustomAttribute<MaxLengthAttribute>();
+            if (maxLenAttr is not null)
+            {
+                return maxLenAttr.Length;
+            }
+        }
+        return null;
+    }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        await ValueChanged.InvokeAsync(e.Value?.ToString());
+    }
+
+    private string GetCountColor()
+    {
+        var len = Value?.Length ?? 0;
+
+        if (len >= _effectiveMaxLength)
+        {
+            return "text-danger fw-bold";
+        }
+
+        if (len >= _effectiveMaxLength * 0.9)
+        {
+            return "text-warning";
+        }
+
+        return "text-muted";
+    }
+}

@@ -1,0 +1,39 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@attribute [Route(RouteConstants.ProductThresholdDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove product threshold</PageTitle>
+
+<h2>Product threshold</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_productThreshold is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ProductThresholdBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+
+    <DeleteForm TItem="ProductThreshold"
+                Item="_productThreshold"
+                OnValidSubmit="DeleteProductThreshold"
+                IsProcessing="_isProcessing"
+                BackToListRoute="@RouteConstants.ProductThresholdBaseRoute">
+
+        <DeleteMessage>
+            Are you sure you want to permanently remove the following product threshold?
+        </DeleteMessage>
+        <ChildContent>
+            <ProductThresholdFieldsDetail Model="_productThreshold" />
+        </ChildContent>
+
+    </DeleteForm>
+
+}
+
+@code {
+
+}

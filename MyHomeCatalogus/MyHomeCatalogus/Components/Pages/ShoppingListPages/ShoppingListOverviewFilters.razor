@@ -1,0 +1,75 @@
+﻿@using MyHomeCatalogus.Interfaces
+@using MyHomeCatalogus.Components.Forms.DataOverviewFilters
+
+@implements IFilterProvider<ShoppingList>
+
+<FilterCheckbox Value="@_showCompletedFilter"
+                ValueChanged="HandleShowCompletedChanged"
+                Label="Show completed" />
+
+<FilterMultiSelect TItem="Store"
+                   Label="Stores"
+                   Items="Stores"
+                   SelectedValues="_selectedStoreIds"
+                   SelectedValuesChanged="HandleProductTypeIdChanged"
+                   GetId="@(p => p.Id)"
+                   GetName="@(p => p.Name)" />
+
+
+@code {
+
+    [CascadingParameter]
+    public DataOverviewForm<ShoppingList>? ParentForm { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<Store> Stores { get; set; }
+
+    public bool IsActive => _showCompletedFilter || _selectedStoreIds.Any();
+
+    private bool _showCompletedFilter = false;
+    private List<int> _selectedStoreIds = new();
+
+
+    protected override void OnInitialized()
+    {
+        ParentForm?.RegisterFilter(this);
+    }
+
+
+    public bool Matches(ShoppingList item)
+    {
+        var matchCompleted = _showCompletedFilter || !item.IsCompleted;
+
+        var matchStore = !_selectedStoreIds.Any() || _selectedStoreIds.Contains(item.StoreId);
+
+        return matchCompleted && matchStore;
+    }
+
+    private async Task HandleShowCompletedChanged(bool value)
+    {
+        _showCompletedFilter = value;
+        await NotifyChanged();
+    }
+
+    private async Task HandleProductTypeIdChanged(List<int> values)
+    {
+        _selectedStoreIds = values;
+        await NotifyChanged();
+    }
+
+    private async Task NotifyChanged()
+    {
+        if (ParentForm != null)
+        {
+            await ParentForm.RefreshAsync();
+        }
+    }
+
+    public void Reset()
+    {
+        _showCompletedFilter = false;
+        _selectedStoreIds.Clear();
+
+        StateHasChanged();
+    }
+}

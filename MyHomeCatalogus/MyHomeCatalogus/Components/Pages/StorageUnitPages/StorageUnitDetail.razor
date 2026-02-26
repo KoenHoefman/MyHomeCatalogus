@@ -1,0 +1,30 @@
+﻿@attribute [Route(RouteConstants.StorageUnitDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Storage unit details</PageTitle>
+
+<h2>Storage unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_storageUnit is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.StorageUnitBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.StorageUnitBaseRoute, _storageUnit.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.StorageUnitBaseRoute, _storageUnit.Id)"
+                BackToListRoute="@RouteConstants.StorageUnitBaseRoute">
+
+        <StorageUnitFieldsDetail Model="_storageUnit"></StorageUnitFieldsDetail>
+
+    </DetailForm>
+
+}
+
+@code {
+
+}

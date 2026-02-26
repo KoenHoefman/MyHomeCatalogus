@@ -1,0 +1,35 @@
+﻿@attribute [Route(RouteConstants.ShoppingListAddRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Add shopping list</PageTitle>
+
+<h2>Shopping list</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (ShoppingList is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ShoppingListBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+
+    <AddUpdateForm TItem="ShoppingList"
+                   EditContext="@EditContext"
+                   OnValidSubmit="AddShoppingList"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.ShoppingListBaseRoute"
+                   FormName="add">
+
+        <ShoppingListFieldsAddUpdate Model="ShoppingList"
+                                     Stores="_stores" />
+
+    </AddUpdateForm>
+
+}
+
+@code {
+
+}

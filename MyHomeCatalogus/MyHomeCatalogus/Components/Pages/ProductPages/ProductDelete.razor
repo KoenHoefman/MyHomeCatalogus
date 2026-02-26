@@ -1,0 +1,37 @@
+﻿@attribute [Route(RouteConstants.ProductDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove product</PageTitle>
+
+<h2>Product</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_product is null)
+        {
+    <LoadingGate BackToListRoute="@RouteConstants.ProductBaseRoute" IsLoading="_message is null" />
+        }
+        else
+        {
+            <DeleteForm TItem="Product"
+                        Item="_product"
+                        OnValidSubmit="DeleteProduct"
+                        IsProcessing="_isProcessing"
+                        BackToListRoute="@RouteConstants.ProductBaseRoute">
+
+                <DeleteMessage>
+                    Are you sure you want to permanently remove the following product?
+                </DeleteMessage>
+                <ChildContent>
+                    <ProductFieldsDetail Model="_product" />
+                </ChildContent>
+
+            </DeleteForm>
+
+        }
+
+@code {
+
+}

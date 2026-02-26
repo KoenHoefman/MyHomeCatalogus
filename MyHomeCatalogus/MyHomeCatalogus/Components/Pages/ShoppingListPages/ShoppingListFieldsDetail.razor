@@ -1,0 +1,36 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+<DetailDeleteFormRow>
+    <LabelContent>Store</LabelContent>
+    <ValueContent>@Model.Store!.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Date created</LabelContent>
+    <ValueContent>@Model.DateCreated!.Value.ToShortDateString()</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Completed</LabelContent>
+    <ValueContent>
+        @if (Model.IsCompleted)
+        {
+            <span>Yes</span>
+        }
+        else
+        {
+            <span>No</span>
+        }
+    </ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Items</LabelContent>
+    <ValueContent>@Model.ShoppingListItems.Count()</ValueContent>
+</DetailDeleteFormRow>
+
+
+@code {
+    [Parameter, EditorRequired]
+    public required ShoppingList Model { get; set; }
+
+}

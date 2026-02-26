@@ -1,0 +1,32 @@
+﻿@attribute [Route(RouteConstants.ShelfBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Components.Extensions
+@using MyHomeCatalogus.Shared.Domain
+
+@rendermode InteractiveServer
+
+<PageTitle>Shelves</PageTitle>
+
+<AlertMessage @bind-Message="_message" />
+
+<DataOverviewForm TItem="Shelf"
+                  DataService="ShelfService"
+                  BaseRoute=@RouteConstants.ShelfBaseRoute
+                  Title="Shelves"
+                  AddItemText="Add new shelf">
+    
+    <FilterTemplate>
+        <ShelfOverviewFilters StorageUnits="_storageUnits"/>
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="Shelf" TProp="string" Property="shelf => shelf.Name" Title="Name" Sortable="true"/>
+        <PropertyColumn TGridItem="Shelf" TProp="string" Property="shelf => shelf.Description ?? string.Empty" Title="Description" Sortable="true"/>
+        <PropertyColumn TGridItem="Shelf" TProp="string" Property="shelf => shelf.StorageUnit!.ToDisplayString()" Title="Storage unit" Sortable="true"/>
+    </GridColumns>
+</DataOverviewForm>
+
+@code {
+
+}

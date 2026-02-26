@@ -1,0 +1,27 @@
+﻿@attribute [Route(RouteConstants.PurchaseUnitBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Shared.Domain
+
+@rendermode InteractiveServer
+
+<PageTitle>Purchase units</PageTitle>
+
+<DataOverviewForm TItem="PurchaseUnit" 
+              DataService="PurchaseUnitService" 
+              BaseRoute="purchaseunits" 
+              Title="Purchase units" 
+              AddItemText="Add new purchase unit">
+
+    <FilterTemplate>
+        <PurchaseUnitOverviewFilters />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="PurchaseUnit" TProp="string" Property="pu => pu.Name" Title="Name" Sortable="true" />
+    </GridColumns>
+</DataOverviewForm>
+
+@code {
+
+}

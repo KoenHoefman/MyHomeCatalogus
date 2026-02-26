@@ -1,0 +1,38 @@
+﻿@attribute [Route(RouteConstants.StoreDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove store</PageTitle>
+
+<h2>Store</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_store is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.StoreBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+
+    <DeleteForm TItem="Store"
+                Item="_store"
+                OnValidSubmit="DeleteStore"
+                IsProcessing="_isProcessing"
+                BackToListRoute="@RouteConstants.StoreBaseRoute">
+
+        <DeleteMessage>
+            Are you sure you want to permanently remove the following store?
+        </DeleteMessage>
+        <ChildContent>
+            <StoreFieldsDetail Model="_store"></StoreFieldsDetail>
+        </ChildContent>
+
+    </DeleteForm>
+
+}
+
+@code {
+
+}

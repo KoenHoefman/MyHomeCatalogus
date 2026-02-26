@@ -1,0 +1,93 @@
+﻿@using MyHomeCatalogus.Interfaces
+@using MyHomeCatalogus.Components.Forms.DataOverviewFilters
+@implements IFilterProvider<Product>
+
+<FilterDelayedInput Value="@_nameFilter"
+                    ValueChanged="HandleNameChanged"
+                    Placeholder="Filter by name..." />
+
+<FilterMultiSelect TItem="ProductType"
+                   Label="Product types"
+                   Items="ProductTypes"
+                   SelectedValues="_selectedProductTypeIds"
+                   SelectedValuesChanged="HandleProductTypeIdChanged"
+                   GetId="@(p => p.Id)"
+                   GetName="@(p => p.Name)" />
+
+<FilterSelect TItem="Store"
+              Value="@_storeIdFilter"
+              ValueChanged="HandleStoreIdChanged"
+              Items="Stores"
+              GetId="@(s => s.Id)"
+              GetName="@(s => s.Name)"
+              DefaultOptionText="All stores" />
+
+@code {
+    private string _nameFilter = string.Empty;
+    private int? _storeIdFilter = null;
+    private List<int> _selectedProductTypeIds = new();
+
+    public bool IsActive => !string.IsNullOrWhiteSpace(_nameFilter) || _storeIdFilter.HasValue || _selectedProductTypeIds.Any();
+
+    [CascadingParameter]
+    public DataOverviewForm<Product>? ParentForm { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<Store> Stores { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<ProductType> ProductTypes { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        ParentForm?.RegisterFilter(this);
+    }
+
+    public bool Matches(Product item)
+    {
+        var matchName = string.IsNullOrWhiteSpace(_nameFilter) ||
+                        item.Name.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase);
+
+        var matchStore = !_storeIdFilter.HasValue || item.StoreId == _storeIdFilter;
+
+        var matchProductType =  !_selectedProductTypeIds.Any() || _selectedProductTypeIds.Contains(item.ProductTypeId);
+
+        return matchName && matchStore && matchProductType;
+    }
+
+    private async Task HandleNameChanged(string? value)
+    {
+        _nameFilter = value ?? string.Empty;
+        await NotifyChanged();
+    }
+
+    private async Task HandleStoreIdChanged(int? value)
+    {
+        _storeIdFilter = value;
+        await NotifyChanged();
+    }
+
+    private async Task HandleProductTypeIdChanged(List<int> values)
+    {
+        _selectedProductTypeIds = values;
+        await NotifyChanged();
+    }
+
+    private async Task NotifyChanged()
+    {
+        if (ParentForm != null)
+        {
+            await ParentForm.RefreshAsync();
+        }
+    }
+
+    public void Reset()
+    {
+        _nameFilter = string.Empty;
+        _storeIdFilter = null;
+        _selectedProductTypeIds.Clear();
+
+        StateHasChanged();
+    }
+}

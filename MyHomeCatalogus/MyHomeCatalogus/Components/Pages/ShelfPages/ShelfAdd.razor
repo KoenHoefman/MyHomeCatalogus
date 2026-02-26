@@ -1,0 +1,33 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@attribute [Route(RouteConstants.ShelfAddRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Add shelf</PageTitle>
+
+<h2>Shelf</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (Shelf is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <AddUpdateForm TItem="Shelf"
+                   EditContext="@EditContext"
+                   OnValidSubmit="AddShelf"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.ShelfBaseRoute"
+                   FormName="add">
+
+        <ShelfFieldsAddUpdate Model="Shelf" StorageUnits="StorageUnits" />
+
+    </AddUpdateForm>
+}
+
+@code {
+
+}

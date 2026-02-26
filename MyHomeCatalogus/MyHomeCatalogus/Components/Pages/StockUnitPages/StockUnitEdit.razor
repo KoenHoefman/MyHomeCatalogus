@@ -1,0 +1,35 @@
+﻿@attribute [Route(RouteConstants.StockUnitEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit stock unit</PageTitle>
+
+
+<h2>Stock unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (StockUnit is null)
+    {
+    <LoadingGate BackToListRoute="@RouteConstants.StockUnitBaseRoute" IsLoading="_message is null" />
+    }
+    else
+    {
+
+        <AddUpdateForm TItem="StockUnit"
+                       EditContext="@EditContext"
+                       OnValidSubmit="UpdateStockUnit"
+                       IsProcessing="_isProcessing"
+                       BackToListRoute="@RouteConstants.StockUnitBaseRoute"
+                       FormName="edit">
+
+            <StockUnitFieldsAddUpdate Model="StockUnit"  />
+
+        </AddUpdateForm>
+
+    }
+
+@code {
+
+}

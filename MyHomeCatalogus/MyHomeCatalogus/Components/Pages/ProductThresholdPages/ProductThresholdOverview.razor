@@ -1,0 +1,29 @@
+﻿@attribute [Route(RouteConstants.ProductThresholdBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Shared.Domain
+
+@rendermode InteractiveServer
+
+<PageTitle>Products</PageTitle>
+
+<DataOverviewForm TItem="ProductThreshold"
+                  DataService="ProductThresholdService"
+                  BaseRoute=@RouteConstants.ProductThresholdBaseRoute
+                  Title="Product thresholds"
+                  AddItemText="Add new product threshold">
+
+    <FilterTemplate>
+        <ProductThresholdOverviewFilters />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="ProductThreshold" TProp="string" Property="threshold => threshold.Product!.Name" Title="Product" Sortable="true" />
+        <PropertyColumn TGridItem="ProductThreshold" TProp="string" Property="threshold => threshold.Threshold.ToString()" Title="Threshold" Sortable="true" />
+        <PropertyColumn TGridItem="ProductThreshold" TProp="string" Property="threshold => threshold.PurchaseQuantity.ToString()" Title="Purchase quantity" Sortable="true" />
+    </GridColumns>
+</DataOverviewForm>
+
+@code {
+
+}

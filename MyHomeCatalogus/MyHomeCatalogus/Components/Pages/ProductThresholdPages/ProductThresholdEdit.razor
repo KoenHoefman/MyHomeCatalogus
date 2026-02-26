@@ -1,0 +1,35 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@attribute [Route(RouteConstants.ProductThresholdEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit product threshold</PageTitle>
+
+<h2>Product threshold</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (ProductThreshold is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ProductThresholdBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <AddUpdateForm TItem="ProductThreshold"
+                   EditContext="@EditContext"
+                   OnValidSubmit="UpdateProductThreshold"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.ProductThresholdBaseRoute"
+                   FormName="edit">
+
+        <ProductThresholdFieldsAddUpdate Model="ProductThreshold"
+                                         Products="Products" />
+
+    </AddUpdateForm>
+
+}
+
+@code {
+
+}

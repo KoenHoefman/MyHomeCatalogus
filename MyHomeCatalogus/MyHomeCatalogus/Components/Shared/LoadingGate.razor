@@ -1,0 +1,24 @@
+﻿
+@if (IsLoading)
+{
+    <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        <span>Loading...</span>
+    </div>
+}
+else
+{
+    <a href="@BackToListRoute"
+       class="btn btn-secondary mt-3"
+       role="button">
+        Back to List
+    </a>
+}
+
+@code {
+    [Parameter, EditorRequired] 
+    public bool IsLoading { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string BackToListRoute { get; set; }
+}

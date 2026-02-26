@@ -1,0 +1,30 @@
+﻿@attribute [Route(RouteConstants.PurchaseUnitDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Purchase unit details</PageTitle>
+
+<h2>Purchase unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_purchaseUnit is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.PurchaseUnitBaseRoute, _purchaseUnit.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.PurchaseUnitBaseRoute, _purchaseUnit.Id)"
+                BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute">
+
+        <PurchaseUnitFieldsDetail Model="_purchaseUnit" />
+
+    </DetailForm>
+
+}
+
+@code {
+
+}

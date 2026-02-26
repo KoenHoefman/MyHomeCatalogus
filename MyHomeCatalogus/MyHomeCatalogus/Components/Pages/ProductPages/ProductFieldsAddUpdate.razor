@@ -1,0 +1,154 @@
+﻿@if (Model.Id != 0)
+{
+    <input type="hidden" name="Model.Id" value="@Model.Id" />
+}
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="name" class="form-label">Name (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputText id="name" @bind-Value="Model.Name" class="form-control" aria-required="true" />
+        <ValidationMessage For="() => Model.Name" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="description" class="form-label">Description:</label>
+    </LabelContent>
+    <InputContent>
+        <TextAreaWithCounter Id="description" @bind-Value="Model.Description" For="() => Model.Description" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="producttypeid" class="form-label">Product type (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputSelect id="producttypeid" @bind-Value="Model.ProductTypeId" class="form-select" aria-required="true">
+
+            <option value="0">-- Select a product type --</option>
+            @foreach (var productType in ProductTypes)
+            {
+                <option value="@productType.Id">@productType.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.ProductTypeId" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="storeid" class="form-label">Store (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputSelect id="storeid" @bind-Value="Model.StoreId" class="form-select" aria-required="true">
+
+            <option value="0">-- Select a store --</option>
+            @foreach (var store in Stores)
+            {
+                <option value="@store.Id">@store.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.StoreId" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="purchaseunitid" class="form-label">Purchase unit (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputSelect id="purchaseunitid" @bind-Value="Model.PurchaseUnitId" class="form-select" aria-required="true">
+
+            <option value="0">-- Select a purchase unit --</option>
+            @foreach (var purchaseUnit in PurchaseUnits)
+            {
+                <option value="@purchaseUnit.Id">@purchaseUnit.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.PurchaseUnitId" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="picture" class="form-label">Picture:</label>
+    </LabelContent>
+    <InputContent>
+        <InputFile id="picture" OnChange="@LoadPicture" accept="image/*" class="form-control" />
+        <ValidationMessage For="() => Model.Picture" class="text-danger" />
+        @if (Model.Picture is not null)
+        {
+            <img class="image-thumbnail mt-2" src="@($" data:{Model.PictureMimeType};base64,{Convert.ToBase64String(Model.Picture)}")" alt="The picture" />
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger ms-2"
+                    @onclick="RemovePicture">
+                <i class="bi bi-trash-fill" aria-hidden="true"></i>
+            </button>
+        }
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="barcode" class="form-label">Barcode:</label>
+    </LabelContent>
+    <InputContent>
+        <InputFile id="barcode" OnChange="@LoadBarcode" accept="image/*" class="form-control" />
+        <ValidationMessage For="() => Model.Barcode" class="text-danger" />
+
+        @if (Model.Barcode is not null)
+        {
+            <img class="image-thumbnail mt-2" src="@($" data:{Model.BarcodeMimeType};base64,{Convert.ToBase64String(Model.Barcode)}")" alt="The barcode"/>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger ms-2"
+                    @onclick="RemoveBarcode">
+                <i class="bi bi-trash-fill" aria-hidden="true"></i>
+            </button>
+        }
+    </InputContent>
+</AddUpdateFormRow>
+
+
+
+@code {
+    [Parameter, EditorRequired]
+    public required Product Model { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<ProductType> ProductTypes { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<Store> Stores { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<PurchaseUnit> PurchaseUnits { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EventCallback<InputFileChangeEventArgs> LoadPicture { get; set; }
+
+    [Parameter, EditorRequired]
+    public required EventCallback<InputFileChangeEventArgs> LoadBarcode { get; set; }
+
+    private void RemovePicture(MouseEventArgs arg)
+    {
+        Model.Picture = null;
+        Model.PictureMimeType = null;
+
+        StateHasChanged();
+    }
+
+    private void RemoveBarcode(MouseEventArgs arg)
+    {
+        Model.Barcode = null;
+        Model.BarcodeMimeType = null;
+
+        StateHasChanged();
+    }
+
+}

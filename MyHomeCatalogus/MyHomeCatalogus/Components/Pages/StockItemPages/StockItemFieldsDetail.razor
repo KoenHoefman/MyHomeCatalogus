@@ -1,0 +1,26 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+<DetailDeleteFormRow>
+    <LabelContent>Product</LabelContent>
+    <ValueContent>@Model.Product!.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Location</LabelContent>
+    <ValueContent>@Model.Shelf!.ToDisplayString()</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Stock unit</LabelContent>
+    <ValueContent>@Model.StockUnit!.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Quantity</LabelContent>
+    <ValueContent>@Model.Quantity</ValueContent>
+</DetailDeleteFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required StockItem Model { get; set; }
+
+}

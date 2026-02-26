@@ -1,0 +1,49 @@
+﻿
+    @if (Model.Id != 0)
+    {
+    <input type="hidden" name="Model.Id" value="@Model.Id" />
+    }
+
+    <AddUpdateFormRow>
+        <LabelContent>
+        <label for="productselect" class="form-label">Product (*):</label>
+        </LabelContent>
+        <InputContent>
+            <InputSelect id="productselect" @bind-Value="Model.ProductId" class="form-select" aria-required="true">
+                <option value="0">-- Select a product --</option>
+                @foreach (var product in Products)
+                {
+                    <option value="@product.Id">@product.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => Model.ProductId" class="text-danger" />
+        </InputContent>
+    </AddUpdateFormRow>
+
+    <AddUpdateFormRow>
+        <LabelContent>
+        <label for="threshold" class="form-label">Threshold (*):</label>
+        </LabelContent>
+        <InputContent>
+            <InputNumber id="threshold" @bind-Value="Model.Threshold" class="form-control" aria-required="true" />
+            <ValidationMessage For="() => Model.Threshold" class="text-danger" />
+        </InputContent>
+    </AddUpdateFormRow>
+
+    <AddUpdateFormRow>
+        <LabelContent>
+        <label for="purchasequantity" class="form-label">Purchase Quantity (*):</label>
+        </LabelContent>
+        <InputContent>
+            <InputNumber id="purchasequantity" @bind-Value="Model.PurchaseQuantity" class="form-control" aria-required="true" />
+            <ValidationMessage For="() => Model.PurchaseQuantity" class="text-danger" />
+        </InputContent>
+    </AddUpdateFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required ProductThreshold Model { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<Product> Products { get; set; }
+}

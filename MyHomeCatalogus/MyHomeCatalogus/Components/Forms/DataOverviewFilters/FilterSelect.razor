@@ -1,0 +1,60 @@
+﻿@using MyHomeCatalogus.Shared.Interfaces
+
+@typeparam TItem where TItem : class, IEntity
+
+<div class="input-group input-group-sm">
+    <label class="input-group-text bg-white">
+        <i class="bi bi-search text-secondary"></i>
+    </label>
+    
+    <select class="form-select" value="@Value" @onchange="OnInternalChange">
+
+        <option value="">@DefaultOptionText</option>
+
+        @if (Items is not null)
+        {
+            foreach (var item in Items)
+            {
+                <option value="@GetId(item)">@GetName(item)</option>
+            }
+        }
+    </select>
+</div>
+
+@code {
+    [Parameter] 
+    public int? Value { get; set; }
+
+    [Parameter] 
+    public EventCallback<int?> ValueChanged { get; set; }
+
+    [Parameter] 
+    public IEnumerable<TItem>? Items { get; set; }
+
+    [Parameter] 
+    public string DefaultOptionText { get; set; } = "All";
+
+    [Parameter, EditorRequired] 
+    public Func<TItem, int> GetId { get; set; } = null!;
+
+    [Parameter, EditorRequired] 
+    public Func<TItem, string> GetName { get; set; } = null!;
+
+
+    private async Task OnInternalChange(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(val))
+        {
+            await ValueChanged.InvokeAsync(null);
+        }
+        else
+        {
+            if (int.TryParse(val, out var result))
+            {
+                await ValueChanged.InvokeAsync(result);
+            }
+
+        }
+    }
+}

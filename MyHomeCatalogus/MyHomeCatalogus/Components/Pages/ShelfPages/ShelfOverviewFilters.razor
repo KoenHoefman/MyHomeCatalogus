@@ -1,0 +1,78 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@using MyHomeCatalogus.Interfaces
+@using MyHomeCatalogus.Components.Forms.DataOverviewFilters
+@implements IFilterProvider<Shelf>
+
+<FilterDelayedInput Value="@_nameFilter"
+                    ValueChanged="HandleNameChanged"
+                    Placeholder="Filter by name..." />
+                    
+
+<FilterMultiSelect TItem="StorageUnit"
+                   Label="Storage unit"
+                   Items="StorageUnits"
+                   SelectedValues="_selectedStorageUnitIds"
+                   SelectedValuesChanged="HandleStorageUnitIdChanged"
+                   GetId="@(p => p.Id)"
+                   GetName="@(p => p.ToDisplayString())" />
+
+
+@code {
+    private string _nameFilter = string.Empty;
+    private List<int> _selectedStorageUnitIds = new();
+
+    public bool IsActive => !string.IsNullOrWhiteSpace(_nameFilter) || _selectedStorageUnitIds.Any();
+
+    [CascadingParameter]
+    public DataOverviewForm<Shelf>? ParentForm { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<StorageUnit> StorageUnits { get; set; }
+
+
+
+    protected override void OnInitialized()
+    {
+        ParentForm?.RegisterFilter(this);
+    }
+
+    public bool Matches(Shelf item)
+    {
+        var matchName = string.IsNullOrWhiteSpace(_nameFilter) ||
+                        item.Name.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase);
+
+        var matchProductType = !_selectedStorageUnitIds.Any() || _selectedStorageUnitIds.Contains(item.StorageUnitId);
+
+        return matchName && matchProductType;
+    }
+
+    private async Task HandleNameChanged(string? value)
+    {
+        _nameFilter = value ?? string.Empty;
+        await NotifyChanged();
+    }
+
+
+    private async Task HandleStorageUnitIdChanged(List<int> values)
+    {
+        _selectedStorageUnitIds = values;
+        await NotifyChanged();
+    }
+
+    private async Task NotifyChanged()
+    {
+        if (ParentForm != null)
+        {
+            await ParentForm.RefreshAsync();
+        }
+    }
+
+    public void Reset()
+    {
+        _nameFilter = string.Empty;
+        _selectedStorageUnitIds.Clear();
+
+        StateHasChanged();
+    }
+
+}

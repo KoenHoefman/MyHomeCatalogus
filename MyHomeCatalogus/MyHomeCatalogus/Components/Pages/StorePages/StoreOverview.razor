@@ -1,0 +1,27 @@
+﻿@attribute [Route(RouteConstants.StoreBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+@rendermode InteractiveServer
+
+<PageTitle>Stores</PageTitle>
+
+<DataOverviewForm TItem="Store"
+              DataService="StoreService"
+              BaseRoute="@RouteConstants.StoreBaseRoute"
+              Title="Stores"
+              AddItemText="Add new store">
+ 
+    <FilterTemplate>
+        <StoreOverviewFilters />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="Store" TProp="string" Property="store => store.Name" Title="Name" Sortable="true" />
+        <PropertyColumn TGridItem="Store" TProp="string" Property="store => store.Description ?? string.Empty" Title="Description" Sortable="true" />
+    </GridColumns>
+</DataOverviewForm>
+
+@code {
+
+}

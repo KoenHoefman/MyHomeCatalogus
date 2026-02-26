@@ -1,0 +1,29 @@
+﻿@attribute [Route(RouteConstants.ProductTypeDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Product type details</PageTitle>
+
+<h2>Product type</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_productType is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ProductTypeBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.ProductTypeBaseRoute, _productType.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.ProductTypeBaseRoute, _productType.Id)"
+                BackToListRoute="@RouteConstants.ProductTypeBaseRoute">
+
+        <ProductTypeFieldsDetail Model="_productType" />
+
+    </DetailForm>
+}
+
+@code {
+
+}

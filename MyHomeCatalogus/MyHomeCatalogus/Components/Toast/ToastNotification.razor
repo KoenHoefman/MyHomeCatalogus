@@ -1,0 +1,33 @@
+﻿<div class="toast-container">
+    @foreach (var toast in _activeToasts.ToList())
+    {
+        <div class="toast show animate-slide-up mb-2" role="alert"
+             @onmouseenter="() => OnMouseEnter(toast)"
+             @onmouseleave="() => OnMouseLeave(toast)">
+
+            <div class="toast-header @GetHeaderClass(toast.Instance.Level) text-white">
+                <i class="@GetIcon(toast.Instance.Level) me-2"></i>
+                <strong class="me-auto">
+                    @(toast.Instance.IsFixed ? "Attention Required" : "Notification")
+                </strong>
+                <button type="button" class="btn-close btn-close-white" @onclick="() => RemoveToast(toast)"></button>
+            </div>
+
+            <div class="toast-body d-flex justify-content-between align-items-center p-3">
+                <span class="fs-5">@toast.Instance.Message</span>
+                @if (toast.Instance.IsFixed)
+                {
+                    <span class="badge bg-light text-dark ms-2">Pinned</span>
+                }
+            </div>
+
+            @if (!toast.Instance.IsFixed)
+            {
+                <div class="toast-progress-container">
+                    <div class="toast-progress-bar"></div>
+                </div>
+            }
+        </div>
+    }
+</div>
+

@@ -1,0 +1,39 @@
+﻿@attribute [Route(RouteConstants.StorageUnitDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove storage unit</PageTitle>
+
+<h2>Storage unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_storageUnit is null)
+        {
+    <LoadingGate BackToListRoute="@RouteConstants.StorageUnitBaseRoute" IsLoading="_message is null" />
+        }
+        else
+        {
+            <DeleteForm TItem="StorageUnit"
+                        Item="_storageUnit"
+                        OnValidSubmit="DeleteStorageUnit"
+                        IsProcessing="_isProcessing"
+                        BackToListRoute="@RouteConstants.StorageUnitBaseRoute">
+
+                <DeleteMessage>
+                    Are you sure you want to permanently remove the following storage unit?
+                    <br />
+                    This will also remove all the related shelves.
+                </DeleteMessage>
+                <ChildContent>
+                    <StorageUnitFieldsDetail Model="_storageUnit" />
+                </ChildContent>
+
+            </DeleteForm>
+        }
+
+
+@code {
+
+}

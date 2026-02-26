@@ -1,0 +1,29 @@
+﻿@if (Model.Id != 0)
+{
+    <input type="hidden" name="Model.Id" value="@Model.Id" />
+}
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="name" class="form-label">Name (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputText id="name" @bind-Value="Model.Name" class="form-control" aria-required="true" />
+        <ValidationMessage For="() => Model.Name" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="description" class="form-label">Description:</label>
+    </LabelContent>
+    <InputContent>
+        <TextAreaWithCounter Id="description" @bind-Value="Model.Description" For="() => Model.Description" />
+    </InputContent>
+</AddUpdateFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required ProductType Model { get; set; }
+
+}

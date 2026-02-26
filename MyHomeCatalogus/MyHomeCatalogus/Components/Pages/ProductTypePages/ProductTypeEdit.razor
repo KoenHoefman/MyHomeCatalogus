@@ -1,0 +1,34 @@
+﻿@attribute [Route(RouteConstants.ProductTypeEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit product type</PageTitle>
+
+
+<h2>Product type</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (ProductType is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ProductTypeBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <AddUpdateForm TItem="ProductType"
+                   EditContext="@EditContext"
+                   OnValidSubmit="UpdateProductType"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.ProductTypeBaseRoute"
+                   FormName="edit">
+
+        <ProductTypeFieldsAddUpdate Model="ProductType" />
+
+    </AddUpdateForm>
+
+}
+
+@code {
+
+}

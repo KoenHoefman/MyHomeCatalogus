@@ -1,0 +1,15 @@
+﻿<DetailDeleteFormRow>
+    <LabelContent>Name</LabelContent>
+    <ValueContent>@Model.Name</ValueContent>
+</DetailDeleteFormRow>
+
+<DetailDeleteFormRow>
+    <LabelContent>Description</LabelContent>
+    <ValueContent>@Model.Description</ValueContent>
+</DetailDeleteFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required ProductType Model { get; set; }
+
+}

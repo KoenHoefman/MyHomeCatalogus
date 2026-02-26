@@ -1,0 +1,82 @@
+﻿@attribute [Route(RouteConstants.ProductBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+@rendermode InteractiveServer
+
+<PageTitle>Products</PageTitle>
+
+<AlertMessage @bind-Message="_message" />
+
+<DataOverviewForm TItem="Product"
+                  DataService="ProductService"
+                  BaseRoute=@RouteConstants.ProductBaseRoute
+                  Title="Products"
+                  AddItemText="Add new product">
+
+    <FilterTemplate>
+        <ProductOverviewFilters Stores="_stores.OrderBy(s => s.Name)" ProductTypes="_productTypes.OrderBy(p => p.Name)" />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="Product" TProp="string" Property="product => product.Name" Title="Name" Sortable="true" />
+
+        <TemplateColumn TGridItem="Product" Context="product" Title="Product type" Sortable="true">
+            @(product.ProductType is null ? string.Empty : product.ProductType.Name)
+        </TemplateColumn>
+
+        <TemplateColumn TGridItem="Product" Context="product" Title="Store" Sortable="true">
+            @(product.Store is null ? string.Empty : product.Store.Name)
+        </TemplateColumn>
+
+    </GridColumns>
+
+    <CustomActions Context="product">
+        <button class="btn btn-outline-success ms-4"
+                title="Add to Shopping List"
+                @onclick="() => OpenModalAddToList(product)">
+            <i class="bi bi-cart-plus"></i>
+        </button>
+    </CustomActions>
+</DataOverviewForm>
+
+@if (_showModalAddToList)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add @_selectedProduct?.Name to List</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModalAddToList"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>
+                                @_errorMessage
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label">Quantity:</label>
+                        <input type="number" class="form-control @(!string.IsNullOrEmpty(_errorMessage) ? "is-invalid" : "")"
+                               @bind="_quantity" min="1" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModalAddToList">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddToList">Add to List</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@code {
+
+}

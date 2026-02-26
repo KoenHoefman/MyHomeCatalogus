@@ -1,0 +1,148 @@
+﻿@using MyHomeCatalogus.Shared.Interfaces
+
+@typeparam TItem where TItem : class, IEntity
+
+<div class="dropdown">
+    <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 text-start bg-white d-flex justify-content-between align-items-center"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            data-bs-auto-close="outside">
+        <span class="text-truncate">
+            <i class="bi bi-filter me-1"></i>
+            @GetButtonText()
+        </span>
+    </button>
+
+    <ul class="dropdown-menu p-2 shadow-sm" style="min-width: 250px; max-height: 400px; overflow-y: auto;">
+
+        @if (ShowSearch)
+        {
+            <li class="px-2 mb-2" @onclick:stopPropagation="true">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Search..."
+                           @bind="_searchTerm" @bind:event="oninput" />
+                </div>
+            </li>
+        }
+
+        <li class="d-flex justify-content-between px-3 py-1 mb-2 border-bottom pb-2" @onclick:stopPropagation="true">
+            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" @onclick="SelectAll">Select All</button>
+            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger" @onclick="ClearAll">Clear All</button>
+        </li>
+
+        @if (Items is not null)
+        {
+            @foreach (var item in GetFilteredItems())
+            {
+                var id = GetId(item);
+                var name = GetName(item);
+                <li>
+                    <div class="form-check px-4 py-1" @onclick:stopPropagation="true">
+                        <input class="form-check-input" type="checkbox"
+                               id="chk-@id"
+                               checked="@SelectedValues.Contains(id)"
+                               @onchange="@(e => ToggleValue(id, e.Value))" />
+                        <label class="form-check-label w-100" for="chk-@id" style="cursor:pointer">
+                            @name
+                        </label>
+                    </div>
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter] 
+    public string Label { get; set; } = "Select Items";
+
+    [Parameter] 
+    public IEnumerable<TItem>? Items { get; set; }
+
+    [Parameter] 
+    public List<int> SelectedValues { get; set; } = new();
+
+    [Parameter] 
+    public EventCallback<List<int>> SelectedValuesChanged { get; set; }
+
+    [Parameter] 
+    public bool ShowSearch { get; set; } = true;
+
+    [Parameter, EditorRequired] 
+    public Func<TItem, int> GetId { get; set; } = null!;
+
+    [Parameter, EditorRequired] 
+    public Func<TItem, string> GetName { get; set; } = null!;
+
+    private string _searchTerm = string.Empty;
+
+    private IEnumerable<TItem> GetFilteredItems()
+    {
+        if (Items == null)
+        {
+            return new List<TItem>();
+        }
+
+        if (string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            return Items;
+        }
+
+        return Items.Where(x => GetName(x).Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string GetButtonText()
+    {
+        if (SelectedValues.Count == 0)
+        {
+            return Label;
+        }
+
+        if (SelectedValues.Count == 1 && Items is not null)
+        {
+            var item = Items.FirstOrDefault(x => GetId(x).Equals(SelectedValues[0]));
+            return item is not null ? GetName(item) : Label;
+        }
+        
+        return $"{Label} ({SelectedValues.Count})";
+    }
+
+    private async Task ToggleValue(int id, object? isChecked)
+    {
+        if ((bool)(isChecked ?? false))
+        {
+            if (!SelectedValues.Contains(id))
+            {
+                SelectedValues.Add(id);
+            }
+        }
+        else
+        {
+            SelectedValues.Remove(id);
+        }
+        await NotifyChanged();
+    }
+
+    private async Task SelectAll()
+    {
+        if (Items == null) return;
+
+        var visibleIds = GetFilteredItems().Select(GetId);
+        
+        foreach (var id in visibleIds)
+        {
+            if (!SelectedValues.Contains(id)) SelectedValues.Add(id);
+        }
+        await NotifyChanged();
+    }
+
+    private async Task ClearAll()
+    {
+        SelectedValues.Clear();
+        await NotifyChanged();
+    }
+
+    private async Task NotifyChanged() => await SelectedValuesChanged.InvokeAsync(SelectedValues);
+}

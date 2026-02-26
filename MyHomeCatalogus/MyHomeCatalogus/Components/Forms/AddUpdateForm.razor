@@ -1,0 +1,54 @@
+﻿@typeparam TItem
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm method="post"
+                  EditContext="@EditContext"
+                  OnSubmit="@HandleSubmitInternal"
+                  FormName="@FormName"
+                  Enhance
+                  class="form-container shadow-sm p-3 mb-5 bg-light rounded">
+
+            <DataAnnotationsValidator />
+
+            <div class="card-body">
+                <fieldset disabled="@IsProcessing">
+                    @ChildContent
+                </fieldset>
+            </div>
+
+            <div class="card-footer bg-transparent border-0">
+                <ValidationSummary class="text-danger" role="alert" />
+                <div class="form-actions d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            disabled="@IsProcessing">
+
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save</span>
+                        }
+                    </button>
+
+                    <a class="btn btn-secondary @(IsProcessing ? "disabled" : "")"
+                       href="@(IsProcessing ? null : BackToListRoute)"
+                       role="button"
+                       aria-disabled="@IsProcessing">
+                        Back to List
+                    </a>
+
+                </div>
+            </div>
+
+        </EditForm>
+    </div>
+</div>
+
+@code {
+}

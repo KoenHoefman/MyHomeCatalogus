@@ -1,0 +1,27 @@
+﻿@attribute [Route(RouteConstants.StockUnitBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Shared.Domain
+
+@rendermode InteractiveServer
+
+<PageTitle>Stock units</PageTitle>
+
+<DataOverviewForm TItem="StockUnit"
+                  DataService="StockUnitService"
+                  BaseRoute="stockunits"
+                  Title="Stock units"
+                  AddItemText="Add new stock unit">
+
+    <FilterTemplate>
+        <StockUnitOverviewFilters />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="StockUnit" TProp="string" Property="pu => pu.Name" Title="Name" Sortable="true" />
+    </GridColumns>
+</DataOverviewForm>
+
+@code {
+
+}

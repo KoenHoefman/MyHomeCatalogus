@@ -1,0 +1,23 @@
+﻿ 
+
+   
+    <DetailDeleteFormRow>
+        <LabelContent>Name</LabelContent>
+        <ValueContent>@Model.Product!.Name</ValueContent>
+    </DetailDeleteFormRow>
+
+    <DetailDeleteFormRow>
+        <LabelContent>Threshold</LabelContent>
+        <ValueContent>@Model.Threshold</ValueContent>
+    </DetailDeleteFormRow>
+
+    <DetailDeleteFormRow>
+        <LabelContent>Purchase quantity</LabelContent>
+        <ValueContent>@Model.PurchaseQuantity</ValueContent>
+    </DetailDeleteFormRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public required ProductThreshold Model { get; set; }
+
+}

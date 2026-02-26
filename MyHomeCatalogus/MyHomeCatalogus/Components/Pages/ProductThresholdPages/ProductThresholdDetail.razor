@@ -1,0 +1,29 @@
+﻿@attribute [Route(RouteConstants.ProductThresholdDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Product threshold details</PageTitle>
+
+<h2>Product threshold</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_productThreshold is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ProductThresholdBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.ProductThresholdBaseRoute, _productThreshold.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.ProductThresholdBaseRoute, _productThreshold.Id)"
+                BackToListRoute="@RouteConstants.ProductThresholdBaseRoute">
+
+        <ProductThresholdFieldsDetail Model="_productThreshold"></ProductThresholdFieldsDetail>
+
+    </DetailForm>
+}
+
+@code {
+
+}

@@ -1,0 +1,37 @@
+﻿@attribute [Route(RouteConstants.StockUnitDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove stock unit</PageTitle>
+
+<h2>Stock unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_stockUnit is null)
+        {
+    <LoadingGate BackToListRoute="@RouteConstants.StockUnitBaseRoute" IsLoading="_message is null" />
+        }
+        else
+        {
+            <DeleteForm TItem="StockUnit"
+                        Item="_stockUnit"
+                        OnValidSubmit="DeleteStockUnit"
+                        IsProcessing="_isProcessing"
+                        BackToListRoute="@RouteConstants.StockUnitBaseRoute">
+
+                <DeleteMessage>
+                    Are you sure you want to permanently remove the following stock unit?
+                </DeleteMessage>
+                <ChildContent>
+                    <StockUnitFieldsDetail Model="_stockUnit" />
+                </ChildContent>
+
+            </DeleteForm>
+
+        }
+
+@code {
+
+}

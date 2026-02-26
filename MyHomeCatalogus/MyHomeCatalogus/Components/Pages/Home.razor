@@ -1,0 +1,14 @@
+﻿@page "/"
+
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<h1>My Home Catalogus</h1>
+
+<br />
+
+@foreach (var widgetType in Widgets)
+{
+    <DynamicComponent Type="widgetType"></DynamicComponent>
+}

@@ -1,0 +1,81 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@if (Model.Id != 0)
+{
+    <input type="hidden" name="Model.Id" value="@Model.Id" />
+}
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="productid" class="form-label">Product (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputSelect id="productid" @bind-Value="Model.ProductId" class="form-select" aria-required="true">
+
+            <option value="0">-- Select a product --</option>
+            @foreach (var product in Products)
+            {
+                <option value="@product.Id">@product.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.ProductId" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="shelfid" class="form-label">Location (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputSelect id="shelfid" @bind-Value="Model.ShelfId" class="form-select" aria-required="true">
+
+            <option value="0">-- Select a location --</option>
+            @foreach (var shelf in Shelves)
+            {
+                <option value="@shelf.Id">@shelf.ToDisplayString()</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.ShelfId" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="stockunitid" class="form-label">Stock unit (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputSelect id="stockunitid" @bind-Value="Model.StockUnitId" class="form-select" aria-required="true">
+
+            <option value="0">-- Select a stock unit --</option>
+            @foreach (var stockUnit in StockUnits)
+            {
+                <option value="@stockUnit.Id">@stockUnit.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.StockUnitId" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+<AddUpdateFormRow>
+    <LabelContent>
+        <label for="quantity" class="form-label">Quantity (*):</label>
+    </LabelContent>
+    <InputContent>
+        <InputNumber id="quantity" @bind-Value="Model.Quantity" class="form-control" aria-required="true" />
+        <ValidationMessage For="() => Model.Quantity" class="text-danger" />
+    </InputContent>
+</AddUpdateFormRow>
+
+
+@code {
+    [Parameter, EditorRequired]
+    public required StockItem Model { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<StockUnit> StockUnits { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<Product> Products { get; set; }
+
+    [Parameter, EditorRequired]
+    public required IEnumerable<Shelf> Shelves { get; set; }
+}

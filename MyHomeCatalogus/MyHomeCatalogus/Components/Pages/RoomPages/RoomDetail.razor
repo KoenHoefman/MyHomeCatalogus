@@ -1,0 +1,30 @@
+﻿@attribute [Route(RouteConstants.RoomDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Room details</PageTitle>
+
+<h2>Room</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_room is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.RoomBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.RoomBaseRoute, _room.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.RoomBaseRoute, _room.Id)"
+                BackToListRoute="@RouteConstants.RoomBaseRoute">
+
+        <RoomFieldsDetail Model="_room" />
+
+    </DetailForm>
+
+}
+
+@code {
+
+}

@@ -1,0 +1,33 @@
+﻿@attribute [Route(RouteConstants.StoreEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit store</PageTitle>
+
+<h2>Store</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (Store is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.StoreBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <AddUpdateForm TItem="Store"
+                   EditContext="@EditContext"
+                   OnValidSubmit="UpdateStore"
+                   IsProcessing="_isProcessing"
+                   BackToListRoute="@RouteConstants.StoreBaseRoute"
+                   FormName="edit">
+
+        <StoreFieldsAddUpdate Model="Store" />
+
+    </AddUpdateForm>
+
+}
+
+@code {
+
+}

@@ -1,0 +1,30 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@attribute [Route(RouteConstants.ProductDetailRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Product details</PageTitle>
+
+<h2>Product</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_product is null)
+{
+    <LoadingGate BackToListRoute="@RouteConstants.ProductBaseRoute" IsLoading="_message is null" />
+}
+else
+{
+    <DetailForm EditRoute="@RouteConstants.GetEditRoute(RouteConstants.ProductBaseRoute, _product.Id)"
+                DeleteRoute="@RouteConstants.GetDeleteRoute(RouteConstants.ProductBaseRoute, _product.Id)"
+                BackToListRoute="@RouteConstants.ProductBaseRoute">
+
+        <ProductFieldsDetail Model="_product" />
+
+    </DetailForm>
+}
+
+@code {
+
+}

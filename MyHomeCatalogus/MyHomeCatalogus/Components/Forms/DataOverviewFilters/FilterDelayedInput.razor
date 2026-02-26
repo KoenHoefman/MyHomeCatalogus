@@ -1,0 +1,61 @@
+﻿@using System.Timers;
+@using Timer = System.Timers.Timer;
+
+@implements IDisposable
+
+<div class="input-group input-group-sm">
+    <span class="input-group-text bg-white border-end-0">
+        <i class="bi bi-search text-secondary"></i>
+    </span>
+    <input type="text"
+           class="form-control border-start-0"
+           placeholder="@Placeholder"
+           value="@Value" 
+           @oninput="OnInput" />
+</div>
+
+@code {
+    private Timer? _timer;
+    private string? _inputValue;
+
+    [Parameter] 
+    public string? Value { get; set; }
+
+    [Parameter] 
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] 
+    public string Placeholder { get; set; } = "Search...";
+
+    [Parameter] 
+    public int DelayedMs { get; set; } = 300;
+
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        _inputValue = e.Value?.ToString();
+        
+        _timer?.Stop();
+        _timer?.Dispose();
+
+        _timer = new Timer(DelayedMs);
+        _timer.Elapsed += OnTimerElapsed;
+
+        _timer.AutoReset = false;
+        _timer.Enabled = true;
+    }
+
+    private async void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(UpdateParent);
+    }
+
+    private async Task UpdateParent()
+    {
+        await ValueChanged.InvokeAsync(_inputValue);
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }}

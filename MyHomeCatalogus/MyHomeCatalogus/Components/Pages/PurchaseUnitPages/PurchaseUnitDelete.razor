@@ -1,0 +1,37 @@
+﻿@attribute [Route(RouteConstants.PurchaseUnitDeleteRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Remove purchase unit</PageTitle>
+
+<h2>Purchase unit</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (_purchaseUnit is null)
+        {
+    <LoadingGate BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute" IsLoading="_message is null" />
+        }
+        else
+        {
+            <DeleteForm TItem="PurchaseUnit"
+                        Item="_purchaseUnit"
+                        OnValidSubmit="DeletePurchaseUnit"
+                        IsProcessing="_isProcessing"
+                        BackToListRoute="@RouteConstants.PurchaseUnitBaseRoute">
+
+                <DeleteMessage>
+                    Are you sure you want to permanently remove the following purchase unit?
+                </DeleteMessage>
+                <ChildContent>
+                    <PurchaseUnitFieldsDetail Model="_purchaseUnit" />
+                </ChildContent>
+
+            </DeleteForm>
+
+        }
+
+@code {
+
+}

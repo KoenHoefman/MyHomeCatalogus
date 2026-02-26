@@ -1,0 +1,37 @@
+﻿@using MyHomeCatalogus.Components.Extensions
+@attribute [Route(RouteConstants.StockItemEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit product threshold</PageTitle>
+
+<h2>Product threshold</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (StockItem is null)
+    {
+    <LoadingGate BackToListRoute="@RouteConstants.StockItemBaseRoute" IsLoading="_message is null" />
+    }
+    else
+    {
+        <AddUpdateForm TItem="StockItem"
+                       EditContext="@EditContext"
+                       OnValidSubmit="UpdateStockItem"
+                       IsProcessing="_isProcessing"
+                       BackToListRoute="@RouteConstants.StockItemBaseRoute"
+                       FormName="edit">
+
+            <StockItemFieldsAddUpdate Model="StockItem"
+                                      Products="_products" 
+                                      StockUnits="_stockUnits" 
+                                      Shelves="_shelves" />
+
+        </AddUpdateForm>
+
+    }
+
+@code {
+
+}

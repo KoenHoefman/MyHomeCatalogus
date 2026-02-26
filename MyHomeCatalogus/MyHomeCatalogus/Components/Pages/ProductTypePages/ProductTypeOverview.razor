@@ -1,0 +1,32 @@
+﻿@attribute [Route(RouteConstants.ProductTypeBaseRoute)]
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MyHomeCatalogus.Shared.Domain
+
+@rendermode InteractiveServer
+
+<PageTitle>Product types</PageTitle>
+
+<DataOverviewForm TItem="ProductType"
+              DataService="ProductTypeService"
+              BaseRoute="producttypes"
+              Title="Product types"
+              AddItemText="Add new product type">
+
+    <FilterTemplate>
+        <ProductTypeOverviewFilters />
+    </FilterTemplate>
+
+    <GridColumns>
+        <PropertyColumn TGridItem="ProductType" TProp="string" Property="productType => productType.Name" Title="Name" Sortable="true" />
+        <PropertyColumn TGridItem="ProductType" TProp="string" Property="productType => productType.Description ?? string.Empty" Title="Description" Sortable="true" />
+    </GridColumns>
+</DataOverviewForm>
+
+
+
+@code {
+
+
+
+}

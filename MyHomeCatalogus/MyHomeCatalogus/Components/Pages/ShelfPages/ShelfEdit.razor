@@ -1,0 +1,34 @@
+﻿@attribute [Route(RouteConstants.ShelfEditRoute)]
+
+@rendermode InteractiveServer
+
+<PageTitle>Edit shelf</PageTitle>
+
+<h2>Shelf</h2>
+<hr />
+
+<AlertMessage @bind-Message="_message" />
+
+@if (Shelf is null)
+    {
+    <LoadingGate BackToListRoute="@RouteConstants.ShelfBaseRoute" IsLoading="_message is null" />
+    }
+    else
+    {
+        <AddUpdateForm TItem="Shelf"
+                       EditContext="@EditContext"
+                       OnValidSubmit="UpdateShelf"
+                       IsProcessing="_isProcessing"
+                       BackToListRoute="@RouteConstants.ShelfBaseRoute"
+                       FormName="edit">
+
+            <ShelfFieldsAddUpdate Model="Shelf"
+                                  StorageUnits="StorageUnits" />
+
+        </AddUpdateForm>
+
+    }
+
+@code {
+
+}
