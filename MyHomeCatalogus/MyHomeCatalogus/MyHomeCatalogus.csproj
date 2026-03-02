@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MyHomeCatalogus.Shared\MyHomeCatalogus.Shared.csproj" />
     <ProjectReference Include="..\MyHomeCatalogus.Client\MyHomeCatalogus.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.21" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.24" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.21" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.11" />
