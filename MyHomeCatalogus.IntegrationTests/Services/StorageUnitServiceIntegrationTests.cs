@@ -6,283 +6,283 @@ using Xunit;
 
 namespace MyHomeCatalogus.IntegrationTests.Services
 {
-    public class StorageUnitServiceIntegrationTests : BaseIntegrationTest
-    {
+	public class StorageUnitServiceIntegrationTests : BaseIntegrationTest
+	{
 
-        private StorageUnitService CreateStorageUnitService()
-        {
-            var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
-            return new StorageUnitService(contextFactory);
-        }
+		private StorageUnitService CreateStorageUnitService()
+		{
+			var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
+			return new StorageUnitService(contextFactory);
+		}
 
-        #region GetAll
+		#region GetAll
 
-        [Fact]
-        public async Task GetAll_ShouldReturnEmptyList_WhenNoStorageUnitsExist()
-        {
-            var storageUnitService = CreateStorageUnitService();
+		[Fact]
+		public async Task GetAll_ShouldReturnEmptyList_WhenNoStorageUnitsExist()
+		{
+			var storageUnitService = CreateStorageUnitService();
 
-            var result = await storageUnitService.GetAll();
+			var result = await storageUnitService.GetAll();
 
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
+			Assert.NotNull(result);
+			Assert.Empty(result);
+		}
 
-        [Fact]
-        public async Task GetAll_ShouldReturnAllStorageUnits()
-        {
-          var testStorageUnit =  await AddTestStorageUnit();
+		[Fact]
+		public async Task GetAll_ShouldReturnAllStorageUnits()
+		{
+			var testStorageUnit = await AddTestStorageUnit();
 
-            //Add 2nd StorageUnit
-            Context.StorageUnits.Add(new StorageUnit
-            {
-                Name = "Foo",
-                Description = "Bar",
-                RoomId = testStorageUnit.RoomId
-            });
+			//Add 2nd StorageUnit
+			Context.StorageUnits.Add(new StorageUnit
+			{
+				Name = "Foo",
+				Description = "Bar",
+				RoomId = testStorageUnit.RoomId
+			});
 
-            await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-            Context.ChangeTracker.Clear();
+			await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+			Context.ChangeTracker.Clear();
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            var result = await storageUnitService.GetAll();
+			var result = await storageUnitService.GetAll();
 
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
-            Assert.All(result, r => Assert.IsType<StorageUnit>(r));
-        }
+			Assert.NotNull(result);
+			Assert.Equal(2, result.Count());
+			Assert.All(result, r => Assert.IsType<StorageUnit>(r));
+		}
 
-        #endregion
+		#endregion
 
-        #region Get
+		#region Get
 
-        [Fact]
-        public async Task Get_ShouldThrowKeyNotFoundException_WhenStorageUnitDoesNotExist()
-        {
-            var nonExistentId = 999;
+		[Fact]
+		public async Task Get_ShouldThrowKeyNotFoundException_WhenStorageUnitDoesNotExist()
+		{
+			var nonExistentId = 999;
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => storageUnitService.Get(nonExistentId));
-        }
+			await Assert.ThrowsAsync<KeyNotFoundException>(() => storageUnitService.Get(nonExistentId));
+		}
 
-        [Fact]
-        public async Task Get_ShouldReturnStorageUnit_WhenStorageUnitExists()
-        {
-            var addedStorageUnit = await AddTestStorageUnit();
+		[Fact]
+		public async Task Get_ShouldReturnStorageUnit_WhenStorageUnitExists()
+		{
+			var addedStorageUnit = await AddTestStorageUnit();
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            var result = await storageUnitService.Get(addedStorageUnit.Id);
+			var result = await storageUnitService.Get(addedStorageUnit.Id);
 
-            Assert.NotNull(result);
-            Assert.Equal(addedStorageUnit.Id, result.Id);
-            Assert.Equal(addedStorageUnit.Name, result.Name);
-            Assert.Equal(addedStorageUnit.Description, result.Description);
-        }
+			Assert.NotNull(result);
+			Assert.Equal(addedStorageUnit.Id, result.Id);
+			Assert.Equal(addedStorageUnit.Name, result.Name);
+			Assert.Equal(addedStorageUnit.Description, result.Description);
+		}
 
-        #endregion
+		#endregion
 
-        #region Add
+		#region Add
 
-        [Fact]
-        public async Task Add_ShouldThrowArgumentNullException_WhenStorageUnitIsNull()
-        {
-            var storageUnitService = CreateStorageUnitService();
+		[Fact]
+		public async Task Add_ShouldThrowArgumentNullException_WhenStorageUnitIsNull()
+		{
+			var storageUnitService = CreateStorageUnitService();
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => storageUnitService.Add(null!));
-        }
+			await Assert.ThrowsAsync<ArgumentNullException>(() => storageUnitService.Add(null!));
+		}
 
-        [Fact]
-        public async Task Add_ShouldAddNewStorageUnitAndAssignId()
-        {
-            var testRoom = await AddTestRoom();
+		[Fact]
+		public async Task Add_ShouldAddNewStorageUnitAndAssignId()
+		{
+			var testRoom = await AddTestRoom();
 
-            var newStorageUnit = new StorageUnit
-            {
-                Name = "Foo",
-                Description = "Bar",
-                RoomId = testRoom.Id
-            };
+			var newStorageUnit = new StorageUnit
+			{
+				Name = "Foo",
+				Description = "Bar",
+				RoomId = testRoom.Id
+			};
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            var addedStorageUnit = await storageUnitService.Add(newStorageUnit);
+			var addedStorageUnit = await storageUnitService.Add(newStorageUnit);
 
-            Assert.NotNull(addedStorageUnit);
+			Assert.NotNull(addedStorageUnit);
 
-            Assert.True(addedStorageUnit.Id > 0);
-            Assert.Equal(newStorageUnit.Name, addedStorageUnit.Name);
+			Assert.True(addedStorageUnit.Id > 0);
+			Assert.Equal(newStorageUnit.Name, addedStorageUnit.Name);
 
-            var retrievedStorageUnit = await Context.StorageUnits.FindAsync([addedStorageUnit.Id], TestContext.Current.CancellationToken);
+			var retrievedStorageUnit = await Context.StorageUnits.FindAsync([addedStorageUnit.Id], TestContext.Current.CancellationToken);
 
-            Assert.NotNull(retrievedStorageUnit);
-            Assert.Equal(addedStorageUnit.Id, retrievedStorageUnit.Id);
-        }
+			Assert.NotNull(retrievedStorageUnit);
+			Assert.Equal(addedStorageUnit.Id, retrievedStorageUnit.Id);
+		}
 
-        #endregion
+		#endregion
 
-        #region Update
+		#region Update
 
-        [Fact]
-        public async Task Update_ShouldThrowKeyNotFoundException_WhenStorageUnitDoesNotExist()
-        {
-            var nonExistentStorageUnit = new StorageUnit { Id = 999, Name = "Ghost StorageUnit" };
+		[Fact]
+		public async Task Update_ShouldThrowKeyNotFoundException_WhenStorageUnitDoesNotExist()
+		{
+			var nonExistentStorageUnit = new StorageUnit { Id = 999, Name = "Ghost StorageUnit" };
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => storageUnitService.Update(nonExistentStorageUnit));
-        }
+			await Assert.ThrowsAsync<KeyNotFoundException>(() => storageUnitService.Update(nonExistentStorageUnit));
+		}
 
-        [Fact]
-        public async Task Update_ShouldThrowArgumentNullException_WhenStorageUnitIsNull()
-        {
-            var storageUnitService = CreateStorageUnitService();
+		[Fact]
+		public async Task Update_ShouldThrowArgumentNullException_WhenStorageUnitIsNull()
+		{
+			var storageUnitService = CreateStorageUnitService();
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => storageUnitService.Update(null!));
-        }
+			await Assert.ThrowsAsync<ArgumentNullException>(() => storageUnitService.Update(null!));
+		}
 
-        [Fact]
-        public async Task Update_ShouldUpdateExistingStorageUnit()
-        {
-            var newName = "Foo";
-            var newDescription = "Bar";
+		[Fact]
+		public async Task Update_ShouldUpdateExistingStorageUnit()
+		{
+			var newName = "Foo";
+			var newDescription = "Bar";
 
-            var storageUnitToUpdate = await AddTestStorageUnit();
+			var storageUnitToUpdate = await AddTestStorageUnit();
 
-            storageUnitToUpdate.Name = newName;
-            storageUnitToUpdate.Description = newDescription;
+			storageUnitToUpdate.Name = newName;
+			storageUnitToUpdate.Description = newDescription;
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            var updatedStorageUnit = await storageUnitService.Update(storageUnitToUpdate);
+			var updatedStorageUnit = await storageUnitService.Update(storageUnitToUpdate);
 
-            Assert.NotNull(updatedStorageUnit);
-            Assert.Equal(storageUnitToUpdate.Id, updatedStorageUnit.Id);
-            Assert.Equal(newName, updatedStorageUnit.Name);
-            Assert.Equal(newDescription, updatedStorageUnit.Description);
+			Assert.NotNull(updatedStorageUnit);
+			Assert.Equal(storageUnitToUpdate.Id, updatedStorageUnit.Id);
+			Assert.Equal(newName, updatedStorageUnit.Name);
+			Assert.Equal(newDescription, updatedStorageUnit.Description);
 
-            var retrievedStorageUnit = await Context.StorageUnits.FindAsync([storageUnitToUpdate.Id], TestContext.Current.CancellationToken);
+			var retrievedStorageUnit = await Context.StorageUnits.FindAsync([storageUnitToUpdate.Id], TestContext.Current.CancellationToken);
 
-            Assert.NotNull(retrievedStorageUnit);
-            Assert.Equal(newName, retrievedStorageUnit.Name);
-            Assert.Equal(newDescription, retrievedStorageUnit.Description);
-        }
+			Assert.NotNull(retrievedStorageUnit);
+			Assert.Equal(newName, retrievedStorageUnit.Name);
+			Assert.Equal(newDescription, retrievedStorageUnit.Description);
+		}
 
-        #endregion
+		#endregion
 
-        #region Delete
+		#region Delete
 
-        [Fact]
-        public async Task Delete_ShouldDoNothing_WhenStorageUnitDoesNotExist()
-        {
-            var nonExistentId = 999;
+		[Fact]
+		public async Task Delete_ShouldDoNothing_WhenStorageUnitDoesNotExist()
+		{
+			var nonExistentId = 999;
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            var ex = await Record.ExceptionAsync(() => storageUnitService.Delete(nonExistentId));
+			var ex = await Record.ExceptionAsync(() => storageUnitService.Delete(nonExistentId));
 
-            // Assert that no exception was thrown and the method simply returned
-            Assert.Null(ex);
-        }
+			// Assert that no exception was thrown and the method simply returned
+			Assert.Null(ex);
+		}
 
-        [Fact]
-        public async Task Delete_ShouldRemoveStorageUnitFromDatabase()
-        {
-            var storageUnitToDelete = await AddTestStorageUnit();
+		[Fact]
+		public async Task Delete_ShouldRemoveStorageUnitFromDatabase()
+		{
+			var storageUnitToDelete = await AddTestStorageUnit();
 
-            var storageUnitService = CreateStorageUnitService();
+			var storageUnitService = CreateStorageUnitService();
 
-            await storageUnitService.Delete(storageUnitToDelete.Id);
+			await storageUnitService.Delete(storageUnitToDelete.Id);
 
-            var deletedStorageUnit = await Context.StorageUnits.FindAsync([storageUnitToDelete.Id], TestContext.Current.CancellationToken);
+			var deletedStorageUnit = await Context.StorageUnits.FindAsync([storageUnitToDelete.Id], TestContext.Current.CancellationToken);
 
-            Assert.Null(deletedStorageUnit);
-        }
+			Assert.Null(deletedStorageUnit);
+		}
 
-        #endregion
+		#endregion
 
-        #region ValidateItem
+		#region ValidateItem
 
-        [Fact]
-        public async Task ValidateItem_ShouldReturnEmpty_WhenStorageUnitNameIsUniqueInRoom()
-        {
-            var room = await AddTestRoom();
+		[Fact]
+		public async Task ValidateItem_ShouldReturnEmpty_WhenStorageUnitNameIsUniqueInRoom()
+		{
+			var room = await AddTestRoom();
 
-            var storageUnit = new StorageUnit() { Name = "Foo", RoomId = room.Id };
-            var service = CreateStorageUnitService();
+			var storageUnit = new StorageUnit() { Name = "Foo", RoomId = room.Id };
+			var service = CreateStorageUnitService();
 
-            var errors = await service.ValidateItem(storageUnit);
+			var errors = await service.ValidateItem(storageUnit);
 
-            Assert.Empty(errors);
-        }
+			Assert.Empty(errors);
+		}
 
-        [Fact]
-        public async Task ValidateItem_ShouldReturnError_WhenStorageUnitNameAlreadyExistsInSameRoom()
-        {
-            var existingStorageUnit = await AddTestStorageUnit();
+		[Fact]
+		public async Task ValidateItem_ShouldReturnError_WhenStorageUnitNameAlreadyExistsInSameRoom()
+		{
+			var existingStorageUnit = await AddTestStorageUnit();
 
-            var duplicateUnit = new StorageUnit
-            {
-                Name = existingStorageUnit.Name,
-                RoomId = existingStorageUnit.RoomId
-            };
+			var duplicateUnit = new StorageUnit
+			{
+				Name = existingStorageUnit.Name,
+				RoomId = existingStorageUnit.RoomId
+			};
 
-            var service = CreateStorageUnitService();
+			var service = CreateStorageUnitService();
 
-            var errors = await service.ValidateItem(duplicateUnit);
+			var errors = await service.ValidateItem(duplicateUnit);
 
-            var error = Assert.Single(errors);
-            Assert.Equal(nameof(StorageUnit.Name), error.PropertyName);
-            Assert.Equal("A storage unit with this name already exists in this room.", error.ErrorMessage);
-        }
+			var error = Assert.Single(errors);
+			Assert.Equal(nameof(StorageUnit.Name), error.PropertyName);
+			Assert.Equal("A storage unit with this name already exists in this room.", error.ErrorMessage);
+		}
 
-        [Fact]
-        public async Task ValidateItem_ShouldAllowSameStorageUnitNameInDifferentRooms()
-        {
-            var sharedName = "Bar";
-            var roomA = await AddTestRoom();
+		[Fact]
+		public async Task ValidateItem_ShouldAllowSameStorageUnitNameInDifferentRooms()
+		{
+			var sharedName = "Bar";
+			var roomA = await AddTestRoom();
 
-            var roomB = Context.Rooms.Add(new Room
-            {
-                Name = "Foo"
-            });
+			var roomB = Context.Rooms.Add(new Room
+			{
+				Name = "Foo"
+			});
 
-            Context.StorageUnits.Add(new StorageUnit
-            {
-                Name = sharedName, 
-                RoomId = roomA.Id
-            });
+			Context.StorageUnits.Add(new StorageUnit
+			{
+				Name = sharedName,
+				RoomId = roomA.Id
+			});
 
-            await Context.SaveChangesAsync();
-            Context.ChangeTracker.Clear();
+			await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+			Context.ChangeTracker.Clear();
 
-            var unitForRoomB = new StorageUnit
-            {
-                Name = sharedName, 
-                RoomId = roomB.Entity.Id
-            };
-            var service = CreateStorageUnitService();
+			var unitForRoomB = new StorageUnit
+			{
+				Name = sharedName,
+				RoomId = roomB.Entity.Id
+			};
+			var service = CreateStorageUnitService();
 
-            var errors = await service.ValidateItem(unitForRoomB);
+			var errors = await service.ValidateItem(unitForRoomB);
 
-            Assert.Empty(errors);
-        }
+			Assert.Empty(errors);
+		}
 
-        [Fact]
-        public async Task ValidateItem_ShouldNotReturnError_WhenUpdatingExistingStorageUnitWithSameName()
-        {
-            var existingStorageUnit = await AddTestStorageUnit();
+		[Fact]
+		public async Task ValidateItem_ShouldNotReturnError_WhenUpdatingExistingStorageUnitWithSameName()
+		{
+			var existingStorageUnit = await AddTestStorageUnit();
 
-            var service = CreateStorageUnitService();
+			var service = CreateStorageUnitService();
 
-            var errors = await service.ValidateItem(existingStorageUnit);
+			var errors = await service.ValidateItem(existingStorageUnit);
 
-            Assert.Empty(errors);
-        }
+			Assert.Empty(errors);
+		}
 
-        #endregion
+		#endregion
 
-    }
+	}
 }

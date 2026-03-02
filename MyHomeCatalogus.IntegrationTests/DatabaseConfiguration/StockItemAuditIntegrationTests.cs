@@ -125,7 +125,7 @@ namespace MyHomeCatalogus.IntegrationTests.DatabaseConfiguration
                     AuditDate = DateTime.Now
                 });
 
-            await Context.SaveChangesAsync();
+            await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
             Context.ChangeTracker.Clear();
 
             var result = await Context.StockItemAudits

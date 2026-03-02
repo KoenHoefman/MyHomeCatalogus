@@ -7,236 +7,236 @@ using Xunit;
 
 namespace MyHomeCatalogus.IntegrationTests.Services
 {
-    public class ProductThresholdServiceIntegrationTests : BaseIntegrationTest
-    {
-        private ProductThresholdService CreateProductThresholdService()
-        {
-            var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
-            return new ProductThresholdService(contextFactory);
-        }
-
-        #region GetAll
-
-        [Fact]
-        public async Task GetAll_ShouldReturnEmpty_WhenNoThresholdsExist()
-        {
-            var service = CreateProductThresholdService();
+	public class ProductThresholdServiceIntegrationTests : BaseIntegrationTest
+	{
+		private ProductThresholdService CreateProductThresholdService()
+		{
+			var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
+			return new ProductThresholdService(contextFactory);
+		}
+
+		#region GetAll
+
+		[Fact]
+		public async Task GetAll_ShouldReturnEmpty_WhenNoThresholdsExist()
+		{
+			var service = CreateProductThresholdService();
 
-            var result = await service.GetAll();
+			var result = await service.GetAll();
 
-            Assert.Empty(result);
-        }
+			Assert.Empty(result);
+		}
 
-        [Fact]
-        public async Task GetAll_ShouldReturnAllThresholds()
-        {
-            var product1 = await AddTestProduct();
+		[Fact]
+		public async Task GetAll_ShouldReturnAllThresholds()
+		{
+			var product1 = await AddTestProduct();
 
-            var product2 = Context.Products.Add(new Product
-            {
-                Name = "Foo",
-                ProductTypeId = product1.ProductTypeId,
-                StoreId = product1.StoreId,
-                PurchaseUnitId = product1.PurchaseUnitId,
-                Picture = [0x01, 0x02, 0x03, 0x04],
-                PictureMimeType = "image/jpeg",
-                Barcode = [0x05, 0x06, 0x07, 0x08],
-                BarcodeMimeType = "image/jpeg"
-            });
-
-            await Context.SaveChangesAsync();
-            Context.ChangeTracker.Clear();
-
-            Context.ProductThresholds.Add(new ProductThreshold
-            {
-                ProductId = product1.Id,
-                Threshold = 5,
-                PurchaseQuantity = 2
-            });
+			var product2 = Context.Products.Add(new Product
+			{
+				Name = "Foo",
+				ProductTypeId = product1.ProductTypeId,
+				StoreId = product1.StoreId,
+				PurchaseUnitId = product1.PurchaseUnitId,
+				Picture = [0x01, 0x02, 0x03, 0x04],
+				PictureMimeType = "image/jpeg",
+				Barcode = [0x05, 0x06, 0x07, 0x08],
+				BarcodeMimeType = "image/jpeg"
+			});
 
-            Context.ProductThresholds.Add(new ProductThreshold
-            {
-                ProductId = product2.Entity.Id,
-                Threshold = 10,
-                PurchaseQuantity = 5
-            });
+			await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+			Context.ChangeTracker.Clear();
 
-            await Context.SaveChangesAsync();
-            Context.ChangeTracker.Clear();
+			Context.ProductThresholds.Add(new ProductThreshold
+			{
+				ProductId = product1.Id,
+				Threshold = 5,
+				PurchaseQuantity = 2
+			});
 
-            var service = CreateProductThresholdService();
+			Context.ProductThresholds.Add(new ProductThreshold
+			{
+				ProductId = product2.Entity.Id,
+				Threshold = 10,
+				PurchaseQuantity = 5
+			});
 
-            var result = await service.GetAll();
+			await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+			Context.ChangeTracker.Clear();
 
-            Assert.Equal(2, result.Count());
-        }
+			var service = CreateProductThresholdService();
 
-        #endregion
+			var result = await service.GetAll();
 
-        #region Get
+			Assert.Equal(2, result.Count());
+		}
 
-        [Fact]
-        public async Task Get_ShouldThrowKeyNotFoundException_WhenIdDoesNotExist()
-        {
-            var service = CreateProductThresholdService();
+		#endregion
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => service.Get(999));
-        }
+		#region Get
 
-        [Fact]
-        public async Task Get_ShouldReturnThreshold_WhenIdExists()
-        {
-            var threshold = await AddTestProductThreshold();
+		[Fact]
+		public async Task Get_ShouldThrowKeyNotFoundException_WhenIdDoesNotExist()
+		{
+			var service = CreateProductThresholdService();
 
-            var service = CreateProductThresholdService();
+			await Assert.ThrowsAsync<KeyNotFoundException>(() => service.Get(999));
+		}
 
-            var result = await service.Get(threshold.Id);
+		[Fact]
+		public async Task Get_ShouldReturnThreshold_WhenIdExists()
+		{
+			var threshold = await AddTestProductThreshold();
 
-            Assert.Equal(threshold.Id, result.Id);
-            Assert.Equal(threshold.Threshold, result.Threshold);
-            Assert.Equal(threshold.ProductId, result.ProductId);
-            Assert.Equal(threshold.PurchaseQuantity, result.PurchaseQuantity);
-        }
+			var service = CreateProductThresholdService();
 
-        #endregion
+			var result = await service.Get(threshold.Id);
 
-        #region Add
+			Assert.Equal(threshold.Id, result.Id);
+			Assert.Equal(threshold.Threshold, result.Threshold);
+			Assert.Equal(threshold.ProductId, result.ProductId);
+			Assert.Equal(threshold.PurchaseQuantity, result.PurchaseQuantity);
+		}
 
-        [Fact]
-        public async Task Add_ShouldPersistThreshold_WhenValid()
-        {
-            var product = await AddTestProduct();
+		#endregion
 
-            var newThreshold = new ProductThreshold
-            {
-                ProductId = product.Id, 
-                Threshold = 5, 
-                PurchaseQuantity = 2
-            };
+		#region Add
 
-            var service = CreateProductThresholdService();
+		[Fact]
+		public async Task Add_ShouldPersistThreshold_WhenValid()
+		{
+			var product = await AddTestProduct();
 
-            var result = await service.Add(newThreshold);
+			var newThreshold = new ProductThreshold
+			{
+				ProductId = product.Id,
+				Threshold = 5,
+				PurchaseQuantity = 2
+			};
 
-            Assert.True(result.Id > 0);
+			var service = CreateProductThresholdService();
 
-            Context.ChangeTracker.Clear();
+			var result = await service.Add(newThreshold);
 
-            var retrievedProduct = await Context.ProductThresholds.FindAsync([result.Id], TestContext.Current.CancellationToken);
-            
-            Assert.NotNull(retrievedProduct);
-            Assert.Equal(newThreshold.ProductId, retrievedProduct.ProductId);
-            Assert.Equal(newThreshold.Threshold, result.Threshold);
-            Assert.Equal(newThreshold.ProductId, result.ProductId);
-            Assert.Equal(newThreshold.PurchaseQuantity, result.PurchaseQuantity);
-        }
+			Assert.True(result.Id > 0);
 
-        [Fact]
-        public async Task Add_ShouldThrowUniqueConstraintException_WhenProductAlreadyHasThreshold()
-        {
-            var existingThreshold = await AddTestProductThreshold();
+			Context.ChangeTracker.Clear();
 
-            var duplicate = new ProductThreshold
-            {
-                ProductId = existingThreshold.ProductId,
-                Threshold = 5,
-                PurchaseQuantity = 5
-            };
+			var retrievedProduct = await Context.ProductThresholds.FindAsync([result.Id], TestContext.Current.CancellationToken);
 
-            var service = CreateProductThresholdService();
+			Assert.NotNull(retrievedProduct);
+			Assert.Equal(newThreshold.ProductId, retrievedProduct.ProductId);
+			Assert.Equal(newThreshold.Threshold, result.Threshold);
+			Assert.Equal(newThreshold.ProductId, result.ProductId);
+			Assert.Equal(newThreshold.PurchaseQuantity, result.PurchaseQuantity);
+		}
 
-            var ex = await Assert.ThrowsAsync<UniqueConstraintException>(() => service.Add(duplicate));
+		[Fact]
+		public async Task Add_ShouldThrowUniqueConstraintException_WhenProductAlreadyHasThreshold()
+		{
+			var existingThreshold = await AddTestProductThreshold();
 
-            Assert.Contains(ex.ValidationErrors, e => e.PropertyName == nameof(ProductThreshold.ProductId));
-        }
+			var duplicate = new ProductThreshold
+			{
+				ProductId = existingThreshold.ProductId,
+				Threshold = 5,
+				PurchaseQuantity = 5
+			};
 
-        #endregion
+			var service = CreateProductThresholdService();
 
-        #region Update
+			var ex = await Assert.ThrowsAsync<UniqueConstraintException>(() => service.Add(duplicate));
 
-        [Fact]
-        public async Task Update_ShouldModifyExistingThreshold()
-        {
-            var existingThreshold = await AddTestProductThreshold();
+			Assert.Contains(ex.ValidationErrors, e => e.PropertyName == nameof(ProductThreshold.ProductId));
+		}
 
-            var newThresholdValue = existingThreshold.Threshold + 5;
-            var newPurchaseQuantity = existingThreshold.PurchaseQuantity + 1;
+		#endregion
 
-            existingThreshold.Threshold = newThresholdValue;
-            existingThreshold.PurchaseQuantity = newPurchaseQuantity;
+		#region Update
 
-            var service = CreateProductThresholdService();
+		[Fact]
+		public async Task Update_ShouldModifyExistingThreshold()
+		{
+			var existingThreshold = await AddTestProductThreshold();
 
-            var result = await service.Update(existingThreshold);
+			var newThresholdValue = existingThreshold.Threshold + 5;
+			var newPurchaseQuantity = existingThreshold.PurchaseQuantity + 1;
 
-            Assert.Equal(newThresholdValue, result.Threshold);
+			existingThreshold.Threshold = newThresholdValue;
+			existingThreshold.PurchaseQuantity = newPurchaseQuantity;
 
-            Context.ChangeTracker.Clear();
+			var service = CreateProductThresholdService();
 
-            var retrievedProduct = await Context.ProductThresholds.FirstOrDefaultAsync(x => x.Id == existingThreshold.Id);
+			var result = await service.Update(existingThreshold);
 
-            Assert.NotNull(retrievedProduct);
+			Assert.Equal(newThresholdValue, result.Threshold);
 
-            Assert.Equal(newThresholdValue, retrievedProduct.Threshold);
-            Assert.Equal(newThresholdValue, retrievedProduct.Threshold);
-            Assert.Equal(newPurchaseQuantity, retrievedProduct.PurchaseQuantity);
-        }
+			Context.ChangeTracker.Clear();
 
-        #endregion
+			var retrievedProduct = await Context.ProductThresholds.FirstOrDefaultAsync(x => x.Id == existingThreshold.Id, TestContext.Current.CancellationToken);
 
-        #region Delete
+			Assert.NotNull(retrievedProduct);
 
-        [Fact]
-        public async Task Delete_ShouldRemoveThreshold_WhenIdExists()
-        {
-            var threshold = await AddTestProductThreshold();
+			Assert.Equal(newThresholdValue, retrievedProduct.Threshold);
+			Assert.Equal(newThresholdValue, retrievedProduct.Threshold);
+			Assert.Equal(newPurchaseQuantity, retrievedProduct.PurchaseQuantity);
+		}
 
-            var service = CreateProductThresholdService();
+		#endregion
 
-            await service.Delete(threshold.Id);
+		#region Delete
 
-            Context.ChangeTracker.Clear();
+		[Fact]
+		public async Task Delete_ShouldRemoveThreshold_WhenIdExists()
+		{
+			var threshold = await AddTestProductThreshold();
 
-            var retrievedProduct = await Context.ProductThresholds.FindAsync(threshold.Id);
+			var service = CreateProductThresholdService();
 
-            Assert.Null(retrievedProduct);
-        }
+			await service.Delete(threshold.Id);
 
-        [Fact]
-        public async Task Delete_ShouldBeIdempotent_WhenIdDoesNotExist()
-        {
-            var service = CreateProductThresholdService();
+			Context.ChangeTracker.Clear();
 
-            var exception = await Record.ExceptionAsync(() => service.Delete(999));
+			var retrievedProduct = await Context.ProductThresholds.FirstOrDefaultAsync(t => t.Id == threshold.Id, TestContext.Current.CancellationToken);
 
-            Assert.Null(exception);
-        }
+			Assert.Null(retrievedProduct);
+		}
 
-        #endregion
+		[Fact]
+		public async Task Delete_ShouldBeIdempotent_WhenIdDoesNotExist()
+		{
+			var service = CreateProductThresholdService();
 
-        #region ValidateItem
+			var exception = await Record.ExceptionAsync(() => service.Delete(999));
 
-        [Fact]
-        public async Task ValidateItem_ShouldReturnError_WhenProductIsDuplicate()
-        {
-            var existingThreshold = await AddTestProductThreshold();
+			Assert.Null(exception);
+		}
 
-            var newItem = new ProductThreshold
-            {
-                ProductId = existingThreshold.ProductId,
-                Threshold = 5,
-                PurchaseQuantity = 5
-            };
+		#endregion
 
-            var service = CreateProductThresholdService();
+		#region ValidateItem
 
-            var errors = await service.ValidateItem(newItem);
+		[Fact]
+		public async Task ValidateItem_ShouldReturnError_WhenProductIsDuplicate()
+		{
+			var existingThreshold = await AddTestProductThreshold();
 
-            var error = Assert.Single(errors);
-            Assert.Equal(nameof(ProductThreshold.ProductId), error.PropertyName);
-            Assert.Equal("There is already a threshold for this product.", error.ErrorMessage);
-        }
+			var newItem = new ProductThreshold
+			{
+				ProductId = existingThreshold.ProductId,
+				Threshold = 5,
+				PurchaseQuantity = 5
+			};
 
-        #endregion
-    }
+			var service = CreateProductThresholdService();
+
+			var errors = await service.ValidateItem(newItem);
+
+			var error = Assert.Single(errors);
+			Assert.Equal(nameof(ProductThreshold.ProductId), error.PropertyName);
+			Assert.Equal("There is already a threshold for this product.", error.ErrorMessage);
+		}
+
+		#endregion
+	}
 }

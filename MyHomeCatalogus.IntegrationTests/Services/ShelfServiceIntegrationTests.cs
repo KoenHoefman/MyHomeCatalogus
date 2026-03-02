@@ -256,7 +256,7 @@ namespace MyHomeCatalogus.IntegrationTests.Services
                 StorageUnitId = unitA.Id
             };
 
-            await Context.SaveChangesAsync();
+            await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
             Context.ChangeTracker.Clear();
 
             var shelfB = new Shelf

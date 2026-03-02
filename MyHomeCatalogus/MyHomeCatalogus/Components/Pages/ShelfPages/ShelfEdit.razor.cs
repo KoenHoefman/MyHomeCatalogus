@@ -46,7 +46,7 @@ namespace MyHomeCatalogus.Components.Pages.ShelfPages
 
                 StorageUnits = await StorageUnitService.GetAll();
             }
-            catch (KeyNotFoundException kex)
+            catch (KeyNotFoundException)
             {
                 _message = "Shelf not found.";
             }
