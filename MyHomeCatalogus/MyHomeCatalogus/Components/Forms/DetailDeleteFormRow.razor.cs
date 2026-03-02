@@ -2,13 +2,13 @@
 
 namespace MyHomeCatalogus.Components.Forms
 {
-    public partial class DetailDeleteFormRow
-    {
-        [Parameter, EditorRequired]
-        public RenderFragment LabelContent { get; set; } = default!;
+	public partial class DetailDeleteFormRow
+	{
+		[Parameter, EditorRequired]
+		public RenderFragment LabelContent { get; set; } = null!;
 
-        [Parameter, EditorRequired]
-        public RenderFragment ValueContent { get; set; } = default!;
+		[Parameter, EditorRequired]
+		public RenderFragment ValueContent { get; set; } = null!;
 
-    }
+	}
 }

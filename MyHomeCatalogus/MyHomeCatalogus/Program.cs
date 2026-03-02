@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyHomeCatalogus.Client.Pages;
 using MyHomeCatalogus.Components;
 using MyHomeCatalogus.Components.Toast;
 using MyHomeCatalogus.Data;
@@ -11,22 +10,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
+	.AddInteractiveServerComponents()
+	.AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddRazorComponents(options =>
-    options.DetailedErrors = builder.Environment.IsDevelopment());
+	options.DetailedErrors = builder.Environment.IsDevelopment());
 
 //EF Core DbContext
 var connectionString =
-    builder.Configuration.GetConnectionString("LocalHostConnection")
-    ?? throw new InvalidOperationException("Connection string"
-                                           + "'LocalHostConnection' not found.");
+	builder.Configuration.GetConnectionString("LocalHostConnection")
+	?? throw new InvalidOperationException("Connection string"
+										   + "'LocalHostConnection' not found.");
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
-    options.UseSqlServer(connectionString)
-        .AddInterceptors(new StockItemAuditInterceptor())
-    );
+	options.UseSqlServer(connectionString)
+		.AddInterceptors(new StockItemAuditInterceptor())
+	);
 
 //Services
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -52,13 +51,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
+	app.UseWebAssemblyDebugging();
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+	app.UseExceptionHandler("/Error", createScopeForErrors: true);
+	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+	app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -67,8 +66,8 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(MyHomeCatalogus.Client._Imports).Assembly);
+	.AddInteractiveServerRenderMode()
+	.AddInteractiveWebAssemblyRenderMode()
+	.AddAdditionalAssemblies(typeof(MyHomeCatalogus.Client._Imports).Assembly);
 
 app.Run();

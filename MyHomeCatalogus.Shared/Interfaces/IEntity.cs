@@ -5,8 +5,8 @@
 /// </summary>
 public interface IEntity
 {
-    /// <summary>
-    /// Gets or sets the unique identifier for the entity.
-    /// </summary>
-    int Id { get; set; }
+	/// <summary>
+	/// Gets or sets the unique identifier for the entity.
+	/// </summary>
+	int Id { get; set; }
 }

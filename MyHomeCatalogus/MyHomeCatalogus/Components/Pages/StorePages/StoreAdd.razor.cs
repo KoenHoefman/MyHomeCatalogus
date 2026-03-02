@@ -8,64 +8,64 @@ using MyHomeCatalogus.Shared.Exceptions;
 
 namespace MyHomeCatalogus.Components.Pages.StorePages
 {
-    public partial class StoreAdd
-    {
-        [Inject]
-        public required IStoreService StoreService { get; set; }
+	public partial class StoreAdd
+	{
+		[Inject]
+		public required IStoreService StoreService { get; set; }
 
-        [Inject]
-        public required NavigationManager NavigationManager { get; set; }
+		[Inject]
+		public required NavigationManager NavigationManager { get; set; }
 
-        [Inject]
-        public required IToastService ToastService { get; set; }
+		[Inject]
+		public required IToastService ToastService { get; set; }
 
-        [SupplyParameterFromForm]
-        private Store Store { get; set; } = new();
+		[SupplyParameterFromForm]
+		private Store Store { get; set; } = new();
 
-        private string? _message = null;
-        private bool _isProcessing;
+		private string? _message;
+		private bool _isProcessing;
 
-        private EditContext EditContext { get; set; } = null!;
+		private EditContext EditContext { get; set; } = null!;
 
-        protected override Task OnInitializedAsync()
-        {
-            EditContext = new EditContext(Store);
+		protected override Task OnInitializedAsync()
+		{
+			EditContext = new EditContext(Store);
 
-            return Task.CompletedTask;
-        }
+			return Task.CompletedTask;
+		}
 
-        private async Task AddStore()
-        {
-            if (_isProcessing)
-            {
-                return;
-            }
+		private async Task AddStore()
+		{
+			if (_isProcessing)
+			{
+				return;
+			}
 
-            try
-            {
-                _isProcessing = true;
-                _message = null;
+			try
+			{
+				_isProcessing = true;
+				_message = null;
 
-                var addedEntity = await StoreService.Add(Store);
+				var addedEntity = await StoreService.Add(Store);
 
-                ToastService.ShowToast($"Store '{addedEntity.Name}' was successfully added.", ToastLevel.Success);
+				ToastService.ShowToast($"Store '{addedEntity.Name}' was successfully added.", ToastLevel.Success);
 
-                NavigationManager.NavigateTo(RouteConstants.GetDetailRoute(RouteConstants.StoreBaseRoute, addedEntity.Id));
-            }
-            catch (UniqueConstraintException uex)
-            {
-                _isProcessing = false;
+				NavigationManager.NavigateTo(RouteConstants.GetDetailRoute(RouteConstants.StoreBaseRoute, addedEntity.Id));
+			}
+			catch (UniqueConstraintException uex)
+			{
+				_isProcessing = false;
 
-                EditContext.AddValidationErrors(uex);
-            }
-            catch (Exception ex)
-            {
-                _isProcessing = false;
+				EditContext.AddValidationErrors(uex);
+			}
+			catch (Exception ex)
+			{
+				_isProcessing = false;
 
-                Console.WriteLine(ex);
+				Console.WriteLine(ex);
 
-                ToastService.ShowToast($"Error adding store: {ex.Message}", ToastLevel.Error, true);
-            }
-        }
-    }
+				ToastService.ShowToast($"Error adding store: {ex.Message}", ToastLevel.Error, true);
+			}
+		}
+	}
 }

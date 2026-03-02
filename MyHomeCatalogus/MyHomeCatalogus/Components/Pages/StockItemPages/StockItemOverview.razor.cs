@@ -3,11 +3,11 @@ using MyHomeCatalogus.Interfaces;
 
 namespace MyHomeCatalogus.Components.Pages.StockItemPages
 {
-    public partial class StockItemOverview
-    {
-        [Inject]
-        public required IStockItemService StockItemService { get; set; }
+	public partial class StockItemOverview
+	{
+		[Inject]
+		public required IStockItemService StockItemService { get; set; }
 
 
-    }
+	}
 }
