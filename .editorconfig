@@ -45,7 +45,6 @@ dotnet_style_collection_initializer = true:suggestion
 dotnet_style_namespace_match_folder = true:suggestion
 
 [*.cs]
-# Suggestion 1: Keep code blocks clean for parameter-heavy methods
 csharp_style_expression_bodied_methods = false:silent
 csharp_style_expression_bodied_constructors = false:silent
 
@@ -54,9 +53,11 @@ csharp_using_directive_placement = outside_namespace:silent
 csharp_prefer_simple_using_statement = true:suggestion
 csharp_style_namespace_declarations = block_scoped:silent
 csharp_style_prefer_primary_constructors = true:suggestion
-csharp_style_var_when_type_is_apparent = true:suggestion
+
 csharp_style_var_for_built_in_types = true:suggestion
 csharp_style_var_when_type_is_apparent = true:suggestion
 csharp_style_var_elsewhere = true:suggestion
+
 csharp_style_deconstructed_variable_declaration = true:suggestion
+
 csharp_style_implicit_object_creation_when_type_is_apparent = false:suggestion
