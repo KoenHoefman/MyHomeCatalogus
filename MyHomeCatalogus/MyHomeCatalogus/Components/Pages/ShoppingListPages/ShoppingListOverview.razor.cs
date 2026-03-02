@@ -13,7 +13,7 @@ namespace MyHomeCatalogus.Components.Pages.ShoppingListPages
 		[Inject]
 		public required IStoreService StoreService { get; set; }
 
-		private string? _message = null;
+		private string? _message;
 		private IEnumerable<Store> _stores = new List<Store>();
 
 		private DataOverviewForm<ShoppingList> _overviewForm = null!;

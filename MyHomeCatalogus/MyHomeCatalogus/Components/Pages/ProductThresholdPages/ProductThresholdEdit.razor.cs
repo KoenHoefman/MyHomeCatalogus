@@ -28,7 +28,7 @@ namespace MyHomeCatalogus.Components.Pages.ProductThresholdPages
 		[SupplyParameterFromForm]
 		private ProductThreshold? ProductThreshold { get; set; }
 
-		private string? _message = null;
+		private string? _message;
 		private bool _isProcessing;
 
 		private EditContext EditContext { get; set; } = null!;
@@ -70,7 +70,7 @@ namespace MyHomeCatalogus.Components.Pages.ProductThresholdPages
 
 				var updatedEntity = await ProductThresholdService.Update(ProductThreshold!);
 
-				ToastService.ShowToast($"Product threshold was successfully updated.", ToastLevel.Success);
+				ToastService.ShowToast("Product threshold was successfully updated.", ToastLevel.Success);
 
 				NavigationManager.NavigateTo(RouteConstants.GetDetailRoute(RouteConstants.ProductThresholdBaseRoute, updatedEntity.Id));
 			}

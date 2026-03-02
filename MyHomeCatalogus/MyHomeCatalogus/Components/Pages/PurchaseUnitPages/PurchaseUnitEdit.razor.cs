@@ -25,7 +25,7 @@ namespace MyHomeCatalogus.Components.Pages.PurchaseUnitPages
 		[SupplyParameterFromForm]
 		private PurchaseUnit? PurchaseUnit { get; set; }
 
-		private string? _message = null;
+		private string? _message;
 		private bool _isProcessing;
 
 		private EditContext EditContext { get; set; } = null!;

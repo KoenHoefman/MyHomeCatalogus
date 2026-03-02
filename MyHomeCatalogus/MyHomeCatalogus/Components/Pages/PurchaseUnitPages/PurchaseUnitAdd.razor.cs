@@ -1,72 +1,70 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Mono.TextTemplating;
 using MyHomeCatalogus.Components.Extensions;
 using MyHomeCatalogus.Components.Toast;
 using MyHomeCatalogus.Interfaces;
-using MyHomeCatalogus.Services;
 using MyHomeCatalogus.Shared.Domain;
 using MyHomeCatalogus.Shared.Exceptions;
 
 namespace MyHomeCatalogus.Components.Pages.PurchaseUnitPages
 {
-    public partial class PurchaseUnitAdd
-    {
-        [Inject]
-        public required IPurchaseUnitService PurchaseUnitService { get; set; }
+	public partial class PurchaseUnitAdd
+	{
+		[Inject]
+		public required IPurchaseUnitService PurchaseUnitService { get; set; }
 
-        [Inject]
-        public required NavigationManager NavigationManager { get; set; }
+		[Inject]
+		public required NavigationManager NavigationManager { get; set; }
 
-        [Inject]
-        public required IToastService ToastService { get; set; }
+		[Inject]
+		public required IToastService ToastService { get; set; }
 
-        [SupplyParameterFromForm]
-        private PurchaseUnit PurchaseUnit { get; set; } = new();
+		[SupplyParameterFromForm]
+		private PurchaseUnit PurchaseUnit { get; set; } = new();
 
-        private string? _message = null;
-        private bool _isProcessing;
+		private string? _message;
+		private bool _isProcessing;
 
-        private EditContext EditContext { get; set; } = null!;
-        
-        protected override Task OnInitializedAsync()
-        {
-            EditContext = new EditContext(PurchaseUnit);
-            return Task.CompletedTask;
-        }
+		private EditContext EditContext { get; set; } = null!;
 
-        private async Task AddPurchaseUnit()
-        {
-            if (_isProcessing)
-            {
-                return;
-            }
+		protected override Task OnInitializedAsync()
+		{
+			EditContext = new EditContext(PurchaseUnit);
+			return Task.CompletedTask;
+		}
 
-            try
-            {
-                _isProcessing = true;
-                _message = null;
+		private async Task AddPurchaseUnit()
+		{
+			if (_isProcessing)
+			{
+				return;
+			}
 
-                var addedEntity = await PurchaseUnitService.Add(PurchaseUnit);
+			try
+			{
+				_isProcessing = true;
+				_message = null;
 
-                ToastService.ShowToast($"Purchase unit '{addedEntity.Name}' was successfully added.", ToastLevel.Success);
+				var addedEntity = await PurchaseUnitService.Add(PurchaseUnit);
 
-                NavigationManager.NavigateTo(RouteConstants.GetDetailRoute(RouteConstants.PurchaseUnitBaseRoute, addedEntity.Id));
-            }
-            catch (UniqueConstraintException uex)
-            {
-                _isProcessing = false;
+				ToastService.ShowToast($"Purchase unit '{addedEntity.Name}' was successfully added.", ToastLevel.Success);
 
-                EditContext.AddValidationErrors(uex);
-            }
-            catch (Exception ex)
-            {
-                _isProcessing = false;
+				NavigationManager.NavigateTo(RouteConstants.GetDetailRoute(RouteConstants.PurchaseUnitBaseRoute, addedEntity.Id));
+			}
+			catch (UniqueConstraintException uex)
+			{
+				_isProcessing = false;
 
-                Console.WriteLine(ex);
+				EditContext.AddValidationErrors(uex);
+			}
+			catch (Exception ex)
+			{
+				_isProcessing = false;
 
-                ToastService.ShowToast($"Error adding purchase unit: {ex.Message}", ToastLevel.Error, true);
-            }
-        }
-    }
+				Console.WriteLine(ex);
+
+				ToastService.ShowToast($"Error adding purchase unit: {ex.Message}", ToastLevel.Error, true);
+			}
+		}
+	}
 }

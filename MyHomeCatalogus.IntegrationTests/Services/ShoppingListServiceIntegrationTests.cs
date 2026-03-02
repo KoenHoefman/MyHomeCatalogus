@@ -383,7 +383,7 @@ namespace MyHomeCatalogus.IntegrationTests.Services
 			var result = (await shoppingListService.GetItemsCountForActiveShoppingLists()).ToList();
 
 			Assert.NotNull(result);
-			Assert.Equal(2, result.Count());
+			Assert.Equal(2, result.Count);
 			Assert.Contains(result, l => l.ShoppingListId == list1Active.Entity.Id);
 			Assert.Contains(result, l => l.ShoppingListId == list3Active.Entity.Id);
 			Assert.DoesNotContain(result, l => l.ShoppingListId == list2Completed.Entity.Id);

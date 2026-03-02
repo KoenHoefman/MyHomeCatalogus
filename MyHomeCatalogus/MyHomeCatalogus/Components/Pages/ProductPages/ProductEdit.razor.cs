@@ -36,7 +36,7 @@ namespace MyHomeCatalogus.Components.Pages.ProductPages
 		[SupplyParameterFromForm]
 		private Product? Product { get; set; }
 
-		private string? _message = null;
+		private string? _message;
 		private bool _isProcessing;
 
 		private EditContext EditContext { get; set; } = null!;

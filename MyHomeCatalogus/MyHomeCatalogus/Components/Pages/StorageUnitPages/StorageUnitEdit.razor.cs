@@ -28,7 +28,7 @@ namespace MyHomeCatalogus.Components.Pages.StorageUnitPages
 		[SupplyParameterFromForm]
 		private StorageUnit? StorageUnit { get; set; }
 
-		private string? _message = null;
+		private string? _message;
 		private bool _isProcessing;
 
 		private EditContext EditContext { get; set; } = null!;

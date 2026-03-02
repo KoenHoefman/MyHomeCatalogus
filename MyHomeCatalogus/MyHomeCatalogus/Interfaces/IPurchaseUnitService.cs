@@ -5,6 +5,6 @@ namespace MyHomeCatalogus.Interfaces;
 /// <summary>
 /// Defines specialized data operations for <see cref="PurchaseUnit"/> entities, extending the base data service capabilities.
 /// </summary>
-public interface IPurchaseUnitService: IDataService<PurchaseUnit>
+public interface IPurchaseUnitService : IDataService<PurchaseUnit>
 {
 }

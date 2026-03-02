@@ -1,6 +1,6 @@
 ﻿namespace MyHomeCatalogus.Components.Widgets
 {
-    public partial class ProductThresholdWidget
-    {
-    }
+	public partial class ProductThresholdWidget
+	{
+	}
 }

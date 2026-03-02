@@ -11,125 +11,125 @@ namespace MyHomeCatalogus.Services;
 /// </summary>
 public class StorageUnitService : IStorageUnitService
 {
-    private readonly IDbContextFactory<AppDbContext> _contextFactory;
+	private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StorageUnitService"/> class.
-    /// </summary>
-    /// <param name="contextFactory">The factory used to create <see cref="AppDbContext"/> instances.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="contextFactory"/> is null.</exception>
-    public StorageUnitService(IDbContextFactory<AppDbContext> contextFactory)
-    {
-        ArgumentNullException.ThrowIfNull(contextFactory);
+	/// <summary>
+	/// Initializes a new instance of the <see cref="StorageUnitService"/> class.
+	/// </summary>
+	/// <param name="contextFactory">The factory used to create <see cref="AppDbContext"/> instances.</param>
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="contextFactory"/> is null.</exception>
+	public StorageUnitService(IDbContextFactory<AppDbContext> contextFactory)
+	{
+		ArgumentNullException.ThrowIfNull(contextFactory);
 
-        _contextFactory = contextFactory;
-    }
+		_contextFactory = contextFactory;
+	}
 
-    /// <inheritdoc />
-    public async Task<IEnumerable<StorageUnit>> GetAll()
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
+	/// <inheritdoc />
+	public async Task<IEnumerable<StorageUnit>> GetAll()
+	{
+		await using var context = await _contextFactory.CreateDbContextAsync();
 
-        return await context.StorageUnits.ToListAsync();
-    }
+		return await context.StorageUnits.ToListAsync();
+	}
 
-    /// <inheritdoc />
-    /// <exception cref="KeyNotFoundException">Thrown when no storage unit with the specified ID is found.</exception>
-    public async Task<StorageUnit> Get(int id)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
+	/// <inheritdoc />
+	/// <exception cref="KeyNotFoundException">Thrown when no storage unit with the specified ID is found.</exception>
+	public async Task<StorageUnit> Get(int id)
+	{
+		await using var context = await _contextFactory.CreateDbContextAsync();
 
-        return await context.StorageUnits.FindAsync(id)
-               ?? throw new KeyNotFoundException($"StorageUnit with Id {id} not found");
-    }
+		return await context.StorageUnits.FindAsync(id)
+			   ?? throw new KeyNotFoundException($"StorageUnit with Id {id} not found");
+	}
 
-    /// <inheritdoc />
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
-    /// <exception cref="UniqueConstraintException">Thrown when the entity violates domain validation or unique constraints.</exception>
-    public async Task<StorageUnit> Add(StorageUnit item)
-    {
-        ArgumentNullException.ThrowIfNull(item);
+	/// <inheritdoc />
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
+	/// <exception cref="UniqueConstraintException">Thrown when the entity violates domain validation or unique constraints.</exception>
+	public async Task<StorageUnit> Add(StorageUnit item)
+	{
+		ArgumentNullException.ThrowIfNull(item);
 
-        var validationErrors = await ValidateItem(item);
+		var validationErrors = await ValidateItem(item);
 
-        if (validationErrors.Any())
-        {
-            throw new UniqueConstraintException("Invalid StorageUnit", validationErrors);
-        }
+		if (validationErrors.Any())
+		{
+			throw new UniqueConstraintException("Invalid StorageUnit", validationErrors);
+		}
 
-        await using var context = await _contextFactory.CreateDbContextAsync();
+		await using var context = await _contextFactory.CreateDbContextAsync();
 
-        var addedEntity = context.StorageUnits.Add(item);
+		var addedEntity = context.StorageUnits.Add(item);
 
-        await context.SaveChangesAsync();
+		await context.SaveChangesAsync();
 
-        return addedEntity.Entity;
-    }
+		return addedEntity.Entity;
+	}
 
-    /// <inheritdoc />
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
-    /// <exception cref="UniqueConstraintException">Thrown when the updated entity violates domain validation or unique constraints.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when the storage unit does not exist in the database.</exception>
-    public async Task<StorageUnit> Update(StorageUnit item)
-    {
-        ArgumentNullException.ThrowIfNull(item);
+	/// <inheritdoc />
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
+	/// <exception cref="UniqueConstraintException">Thrown when the updated entity violates domain validation or unique constraints.</exception>
+	/// <exception cref="KeyNotFoundException">Thrown when the storage unit does not exist in the database.</exception>
+	public async Task<StorageUnit> Update(StorageUnit item)
+	{
+		ArgumentNullException.ThrowIfNull(item);
 
-        var validationErrors = await ValidateItem(item);
+		var validationErrors = await ValidateItem(item);
 
-        if (validationErrors.Any())
-        {
-            throw new UniqueConstraintException("Invalid StorageUnit", validationErrors);
-        }
+		if (validationErrors.Any())
+		{
+			throw new UniqueConstraintException("Invalid StorageUnit", validationErrors);
+		}
 
-        await using var context = await _contextFactory.CreateDbContextAsync();
+		await using var context = await _contextFactory.CreateDbContextAsync();
 
-        var foundEntity = await context.StorageUnits.FindAsync(item.Id);
+		var foundEntity = await context.StorageUnits.FindAsync(item.Id);
 
-        if (foundEntity is not null)
-        {
-            context.Entry(foundEntity).CurrentValues.SetValues(item);
+		if (foundEntity is not null)
+		{
+			context.Entry(foundEntity).CurrentValues.SetValues(item);
 
-            await context.SaveChangesAsync();
-        }
+			await context.SaveChangesAsync();
+		}
 
-        return foundEntity ?? throw new KeyNotFoundException($"StorageUnit with Id {item.Id} not found");
-    }
+		return foundEntity ?? throw new KeyNotFoundException($"StorageUnit with Id {item.Id} not found");
+	}
 
-    /// <inheritdoc />
-    /// <remarks>This operation is idempotent; if the ID does not exist, the method completes without error.</remarks>
-    public async Task Delete(int id)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
+	/// <inheritdoc />
+	/// <remarks>This operation is idempotent; if the ID does not exist, the method completes without error.</remarks>
+	public async Task Delete(int id)
+	{
+		await using var context = await _contextFactory.CreateDbContextAsync();
 
-        var foundEntity = await context.StorageUnits.FirstOrDefaultAsync(p => p.Id == id);
+		var foundEntity = await context.StorageUnits.FirstOrDefaultAsync(p => p.Id == id);
 
-        if (foundEntity == null)
-        {
-            return;
-        }
+		if (foundEntity == null)
+		{
+			return;
+		}
 
-        //Cascading delete will remove all linked shelves
-        context.StorageUnits.Remove(foundEntity);
+		//Cascading delete will remove all linked shelves
+		context.StorageUnits.Remove(foundEntity);
 
-        await context.SaveChangesAsync();
-    }
+		await context.SaveChangesAsync();
+	}
 
-    /// <inheritdoc />
-    public async Task<List<(string PropertyName, string ErrorMessage)>> ValidateItem(StorageUnit item)
-    {
-        var returnValue = new List<(string PropertyName, string ErrorMessage)>();
+	/// <inheritdoc />
+	public async Task<List<(string PropertyName, string ErrorMessage)>> ValidateItem(StorageUnit item)
+	{
+		var returnValue = new List<(string PropertyName, string ErrorMessage)>();
 
-        await using var context = await _contextFactory.CreateDbContextAsync();
+		await using var context = await _contextFactory.CreateDbContextAsync();
 
-        //Unique index on name and room
-        var duplicate = await context.StorageUnits
-            .AnyAsync(s => s.Name == item.Name && s.RoomId == item.RoomId && s.Id != item.Id);
+		//Unique index on name and room
+		var duplicate = await context.StorageUnits
+			.AnyAsync(s => s.Name == item.Name && s.RoomId == item.RoomId && s.Id != item.Id);
 
-        if (duplicate)
-        {
-            returnValue.Add((nameof(item.Name), "A storage unit with this name already exists in this room."));
-        }
+		if (duplicate)
+		{
+			returnValue.Add((nameof(item.Name), "A storage unit with this name already exists in this room."));
+		}
 
-        return returnValue;
-    }
+		return returnValue;
+	}
 }

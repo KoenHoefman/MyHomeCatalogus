@@ -25,7 +25,7 @@ namespace MyHomeCatalogus.Components.Pages.RoomPages
 		[SupplyParameterFromForm]
 		private Room? Room { get; set; }
 
-		private string? _message = null;
+		private string? _message;
 		private bool _isProcessing;
 
 		private EditContext EditContext { get; set; } = null!;

@@ -1,243 +1,243 @@
-﻿using MyHomeCatalogus.IntegrationTests.Base;
+﻿using Microsoft.EntityFrameworkCore;
+using MyHomeCatalogus.IntegrationTests.Base;
 using MyHomeCatalogus.Services;
 using MyHomeCatalogus.Shared.Domain;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace MyHomeCatalogus.IntegrationTests.Services
 {
-    public class StockUnitServiceIntegrationTests : BaseIntegrationTest
-    {
+	public class StockUnitServiceIntegrationTests : BaseIntegrationTest
+	{
 
-        private StockUnitService CreateStockUnitService()
-        {
-            var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
-            return new StockUnitService(contextFactory);
-        }
+		private StockUnitService CreateStockUnitService()
+		{
+			var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
+			return new StockUnitService(contextFactory);
+		}
 
-        #region GetAll
+		#region GetAll
 
-        [Fact]
-        public async Task GetAll_ShouldReturnEmptyList_WhenNoStockUnitsExist()
-        {
-            var stockUnitService = CreateStockUnitService();
+		[Fact]
+		public async Task GetAll_ShouldReturnEmptyList_WhenNoStockUnitsExist()
+		{
+			var stockUnitService = CreateStockUnitService();
 
-            var result = await stockUnitService.GetAll();
+			var result = await stockUnitService.GetAll();
 
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
+			Assert.NotNull(result);
+			Assert.Empty(result);
+		}
 
-        [Fact]
-        public async Task GetAll_ShouldReturnAllStockUnits()
-        {
-            await AddTestStockUnit();
+		[Fact]
+		public async Task GetAll_ShouldReturnAllStockUnits()
+		{
+			await AddTestStockUnit();
 
-            //Add 2nd StockUnit
-            Context.StockUnits.Add(new StockUnit
-            {
-                Name = "Foo"
-            });
+			//Add 2nd StockUnit
+			Context.StockUnits.Add(new StockUnit
+			{
+				Name = "Foo"
+			});
 
-            await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-            Context.ChangeTracker.Clear();
+			await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
+			Context.ChangeTracker.Clear();
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            var result = await stockUnitService.GetAll();
+			var result = await stockUnitService.GetAll();
 
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
-            Assert.All(result, r => Assert.IsType<StockUnit>(r));
-        }
+			Assert.NotNull(result);
+			Assert.Equal(2, result.Count());
+			Assert.All(result, r => Assert.IsType<StockUnit>(r));
+		}
 
-        #endregion
+		#endregion
 
-        #region Get
+		#region Get
 
-        [Fact]
-        public async Task Get_ShouldThrowKeyNotFoundException_WhenStockUnitDoesNotExist()
-        {
-            var nonExistentId = 999;
+		[Fact]
+		public async Task Get_ShouldThrowKeyNotFoundException_WhenStockUnitDoesNotExist()
+		{
+			var nonExistentId = 999;
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => stockUnitService.Get(nonExistentId));
-        }
+			await Assert.ThrowsAsync<KeyNotFoundException>(() => stockUnitService.Get(nonExistentId));
+		}
 
-        [Fact]
-        public async Task Get_ShouldReturnStockUnit_WhenStockUnitExists()
-        {
-            var addedStockUnit = await AddTestStockUnit();
+		[Fact]
+		public async Task Get_ShouldReturnStockUnit_WhenStockUnitExists()
+		{
+			var addedStockUnit = await AddTestStockUnit();
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            var result = await stockUnitService.Get(addedStockUnit.Id);
+			var result = await stockUnitService.Get(addedStockUnit.Id);
 
-            Assert.NotNull(result);
-            Assert.Equal(addedStockUnit.Id, result.Id);
-            Assert.Equal(addedStockUnit.Name, result.Name);
-        }
+			Assert.NotNull(result);
+			Assert.Equal(addedStockUnit.Id, result.Id);
+			Assert.Equal(addedStockUnit.Name, result.Name);
+		}
 
-        #endregion
+		#endregion
 
-        #region Add
+		#region Add
 
-        [Fact]
-        public async Task Add_ShouldThrowArgumentNullException_WhenStockUnitIsNull()
-        {
-            var stockUnitService = CreateStockUnitService();
+		[Fact]
+		public async Task Add_ShouldThrowArgumentNullException_WhenStockUnitIsNull()
+		{
+			var stockUnitService = CreateStockUnitService();
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => stockUnitService.Add(null!));
-        }
+			await Assert.ThrowsAsync<ArgumentNullException>(() => stockUnitService.Add(null!));
+		}
 
-        [Fact]
-        public async Task Add_ShouldAddNewStockUnitAndAssignId()
-        {
-            var newStockUnit = new StockUnit
-            {
-                Name = "Foo"
-            };
+		[Fact]
+		public async Task Add_ShouldAddNewStockUnitAndAssignId()
+		{
+			var newStockUnit = new StockUnit
+			{
+				Name = "Foo"
+			};
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            var addedStockUnit = await stockUnitService.Add(newStockUnit);
+			var addedStockUnit = await stockUnitService.Add(newStockUnit);
 
-            Assert.NotNull(addedStockUnit);
+			Assert.NotNull(addedStockUnit);
 
-            Assert.True(addedStockUnit.Id > 0);
-            Assert.Equal(newStockUnit.Name, addedStockUnit.Name);
+			Assert.True(addedStockUnit.Id > 0);
+			Assert.Equal(newStockUnit.Name, addedStockUnit.Name);
 
-            var retrievedStockUnit = await Context.StockUnits.FindAsync([addedStockUnit.Id], TestContext.Current.CancellationToken);
+			var retrievedStockUnit = await Context.StockUnits.FindAsync([addedStockUnit.Id], TestContext.Current.CancellationToken);
 
-            Assert.NotNull(retrievedStockUnit);
-            Assert.Equal(addedStockUnit.Id, retrievedStockUnit.Id);
-        }
+			Assert.NotNull(retrievedStockUnit);
+			Assert.Equal(addedStockUnit.Id, retrievedStockUnit.Id);
+		}
 
-        #endregion
+		#endregion
 
-        #region Update
+		#region Update
 
-        [Fact]
-        public async Task Update_ShouldThrowKeyNotFoundException_WhenStockUnitDoesNotExist()
-        {
-            var nonExistentStockUnit = new StockUnit { Id = 999, Name = "Ghost StockUnit" };
+		[Fact]
+		public async Task Update_ShouldThrowKeyNotFoundException_WhenStockUnitDoesNotExist()
+		{
+			var nonExistentStockUnit = new StockUnit { Id = 999, Name = "Ghost StockUnit" };
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => stockUnitService.Update(nonExistentStockUnit));
-        }
+			await Assert.ThrowsAsync<KeyNotFoundException>(() => stockUnitService.Update(nonExistentStockUnit));
+		}
 
-        [Fact]
-        public async Task Update_ShouldThrowArgumentNullException_WhenStockUnitIsNull()
-        {
-            var stockUnitService = CreateStockUnitService();
+		[Fact]
+		public async Task Update_ShouldThrowArgumentNullException_WhenStockUnitIsNull()
+		{
+			var stockUnitService = CreateStockUnitService();
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => stockUnitService.Update(null!));
-        }
+			await Assert.ThrowsAsync<ArgumentNullException>(() => stockUnitService.Update(null!));
+		}
 
-        [Fact]
-        public async Task Update_ShouldUpdateExistingStockUnit()
-        {
-            var newName = "Foo";
+		[Fact]
+		public async Task Update_ShouldUpdateExistingStockUnit()
+		{
+			var newName = "Foo";
 
-            var stockUnitToUpdate = await AddTestStockUnit();
+			var stockUnitToUpdate = await AddTestStockUnit();
 
-            stockUnitToUpdate.Name = newName;
+			stockUnitToUpdate.Name = newName;
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            var updatedStockUnit = await stockUnitService.Update(stockUnitToUpdate);
+			var updatedStockUnit = await stockUnitService.Update(stockUnitToUpdate);
 
-            Assert.NotNull(updatedStockUnit);
-            Assert.Equal(stockUnitToUpdate.Id, updatedStockUnit.Id);
-            Assert.Equal(newName, updatedStockUnit.Name);
+			Assert.NotNull(updatedStockUnit);
+			Assert.Equal(stockUnitToUpdate.Id, updatedStockUnit.Id);
+			Assert.Equal(newName, updatedStockUnit.Name);
 
-            var retrievedStockUnit = await Context.StockUnits.FindAsync([stockUnitToUpdate.Id], TestContext.Current.CancellationToken);
+			var retrievedStockUnit = await Context.StockUnits.FindAsync([stockUnitToUpdate.Id], TestContext.Current.CancellationToken);
 
-            Assert.NotNull(retrievedStockUnit);
-            Assert.Equal(newName, retrievedStockUnit.Name);
-        }
+			Assert.NotNull(retrievedStockUnit);
+			Assert.Equal(newName, retrievedStockUnit.Name);
+		}
 
-        #endregion
+		#endregion
 
-        #region Delete
+		#region Delete
 
-        [Fact]
-        public async Task Delete_ShouldDoNothing_WhenStockUnitDoesNotExist()
-        {
-            var nonExistentId = 999;
+		[Fact]
+		public async Task Delete_ShouldDoNothing_WhenStockUnitDoesNotExist()
+		{
+			var nonExistentId = 999;
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            var ex = await Record.ExceptionAsync(() => stockUnitService.Delete(nonExistentId));
+			var ex = await Record.ExceptionAsync(() => stockUnitService.Delete(nonExistentId));
 
-            // Assert that no exception was thrown and the method simply returned
-            Assert.Null(ex);
-        }
+			// Assert that no exception was thrown and the method simply returned
+			Assert.Null(ex);
+		}
 
-        [Fact]
-        public async Task Delete_ShouldRemoveStockUnitFromDatabase()
-        {
-            var stockUnitToDelete = await AddTestStockUnit();
+		[Fact]
+		public async Task Delete_ShouldRemoveStockUnitFromDatabase()
+		{
+			var stockUnitToDelete = await AddTestStockUnit();
 
-            var stockUnitService = CreateStockUnitService();
+			var stockUnitService = CreateStockUnitService();
 
-            await stockUnitService.Delete(stockUnitToDelete.Id);
+			await stockUnitService.Delete(stockUnitToDelete.Id);
 
-            var deletedStockUnit = await Context.StockUnits.FindAsync([stockUnitToDelete.Id], TestContext.Current.CancellationToken);
+			var deletedStockUnit = await Context.StockUnits.FindAsync([stockUnitToDelete.Id], TestContext.Current.CancellationToken);
 
-            Assert.Null(deletedStockUnit);
-        }
+			Assert.Null(deletedStockUnit);
+		}
 
-        #endregion
+		#endregion
 
-        #region ValidateItem
+		#region ValidateItem
 
-        [Fact]
-        public async Task ValidateItem_ShouldReturnEmpty_WhenStockUnitNameIsUnique()
-        {
-            var stockUnit = new StockUnit { Name = "Foo" };
+		[Fact]
+		public async Task ValidateItem_ShouldReturnEmpty_WhenStockUnitNameIsUnique()
+		{
+			var stockUnit = new StockUnit { Name = "Foo" };
 
-            var service = CreateStockUnitService();
+			var service = CreateStockUnitService();
 
-            var errors = await service.ValidateItem(stockUnit);
+			var errors = await service.ValidateItem(stockUnit);
 
-            Assert.Empty(errors);
-        }
+			Assert.Empty(errors);
+		}
 
-        [Fact]
-        public async Task ValidateItem_ShouldReturnError_WhenStockUnitNameAlreadyExists()
-        {
-            var existingStockUnit = await AddTestStockUnit();
+		[Fact]
+		public async Task ValidateItem_ShouldReturnError_WhenStockUnitNameAlreadyExists()
+		{
+			var existingStockUnit = await AddTestStockUnit();
 
-            var newStockUnit = new StockUnit
-            {
-                Name = existingStockUnit.Name
-            };
+			var newStockUnit = new StockUnit
+			{
+				Name = existingStockUnit.Name
+			};
 
-            var service = CreateStockUnitService();
+			var service = CreateStockUnitService();
 
-            var errors = await service.ValidateItem(newStockUnit);
+			var errors = await service.ValidateItem(newStockUnit);
 
-            var error = Assert.Single(errors);
-            Assert.Equal(nameof(ProductType.Name), error.PropertyName);
-            Assert.Equal("A stock unit with this name already exists.", error.ErrorMessage);
-        }
+			var error = Assert.Single(errors);
+			Assert.Equal(nameof(ProductType.Name), error.PropertyName);
+			Assert.Equal("A stock unit with this name already exists.", error.ErrorMessage);
+		}
 
-        [Fact]
-        public async Task ValidateItem_ShouldNotReturnError_WhenUpdatingExistingStockUnitWithSameName()
-        {
-            var existingStockUnite = await AddTestStockUnit();
+		[Fact]
+		public async Task ValidateItem_ShouldNotReturnError_WhenUpdatingExistingStockUnitWithSameName()
+		{
+			var existingStockUnite = await AddTestStockUnit();
 
-            var service = CreateStockUnitService();
+			var service = CreateStockUnitService();
 
-            var errors = await service.ValidateItem(existingStockUnite);
+			var errors = await service.ValidateItem(existingStockUnite);
 
-            Assert.Empty(errors);
-        }
+			Assert.Empty(errors);
+		}
 
-        #endregion
+		#endregion
 
-    }
+	}
 }

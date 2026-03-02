@@ -25,7 +25,7 @@ namespace MyHomeCatalogus.Components.Pages.StockUnitPages
 		[SupplyParameterFromForm]
 		private StockUnit? StockUnit { get; set; }
 
-		private string? _message = null;
+		private string? _message;
 		private bool _isProcessing;
 
 		private EditContext EditContext { get; set; } = null!;
