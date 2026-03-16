@@ -29,6 +29,8 @@ namespace MyHomeCatalogus.Components.Pages.ShoppingListPages
 		private EditItemModal _editItemModal = null!;
 		private ConfirmationModal<ShoppingListItem> _deleteModal = null!;
 		private QuickGrid<ShoppingListItem>? _grid;
+		private bool _isLoading;
+
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -70,6 +72,9 @@ namespace MyHomeCatalogus.Components.Pages.ShoppingListPages
 		{
 			try
 			{
+				_isLoading = true;
+				_message = null;
+
 				_shoppingList = await ShoppingListService.Get(Id);
 
 				_items = _shoppingList.ShoppingListItems.Any() ?
@@ -84,6 +89,10 @@ namespace MyHomeCatalogus.Components.Pages.ShoppingListPages
 			{
 				Console.WriteLine(ex);
 				_message = $"Error fetching data.  {ex.Message}";
+			}
+			finally
+			{
+				_isLoading = false;
 			}
 		}
 
