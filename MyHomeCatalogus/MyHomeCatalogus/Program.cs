@@ -1,5 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MyHomeCatalogus.Authorization.Handlers;
+using MyHomeCatalogus.Authorization.Requirements;
 using MyHomeCatalogus.Components;
+using MyHomeCatalogus.Components.Account;
 using MyHomeCatalogus.Components.Toast;
 using MyHomeCatalogus.Data;
 using MyHomeCatalogus.Data.Interceptors;
@@ -16,6 +22,19 @@ builder.Services.AddRazorComponents()
 builder.Services.AddRazorComponents(options =>
 	options.DetailedErrors = builder.Environment.IsDevelopment());
 
+
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+
+builder.Services.AddAuthentication(options =>
+	{
+		options.DefaultScheme = IdentityConstants.ApplicationScheme;
+		options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+	})
+	.AddIdentityCookies();
+
 //EF Core DbContext
 var connectionString =
 	builder.Configuration.GetConnectionString("LocalHostConnection")
@@ -26,6 +45,13 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
 	options.UseSqlServer(connectionString)
 		.AddInterceptors(new StockItemAuditInterceptor())
 	);
+
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+	.AddEntityFrameworkStores<AppDbContext>()
+	.AddSignInManager()
+	.AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 //Services
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -45,6 +71,14 @@ builder.Services.AddScoped<IShoppingListItemService, ShoppingListItemService>();
 builder.Services.AddScoped<IProductThresholdService, ProductThresholdService>();
 
 builder.Services.AddScoped<IToastService, ToastService>();
+
+builder.Services.AddScoped<IAuthorizationHandler, ApprovedUserHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("ApprovedOnly", policy =>
+		policy.Requirements.Add(new ApprovedUserRequirement()));
+});
 
 var app = builder.Build();
 
@@ -68,6 +102,7 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode()
 	.AddInteractiveWebAssemblyRenderMode()
-	.AddAdditionalAssemblies(typeof(MyHomeCatalogus.Client._Imports).Assembly);
+	.AddAdditionalAssemblies(typeof(MyHomeCatalogus.Client._Imports).Assembly)
+	.RequireAuthorization("ApprovedOnly");
 
 app.Run();
