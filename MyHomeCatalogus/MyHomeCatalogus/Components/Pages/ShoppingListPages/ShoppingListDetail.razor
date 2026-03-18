@@ -34,24 +34,37 @@ else
             </button>
         </div>
 
-        <div style="height:500px;overflow-y:scroll">
-            <QuickGrid @ref="_grid" Class="table" Virtualize="true" Items="@_items" ItemSize="30">
-                <PropertyColumn TGridItem="ShoppingListItem" TProp="string" Property="s => s.Product!.Name" Title="Product" />
-                <PropertyColumn TGridItem="ShoppingListItem" TProp="int" Property="s => s.Quantity" Title="Quantity" />
-                <TemplateColumn Context="item" Title="Actions" Align="Align.Center">
-                    <button class="btn btn-outline-warning"
-                            title="Edit"
-                            @onclick="() => _editItemModal.OpenModal(item)">
-                        <i class="bi bi-pencil-square fs-5"></i>
-                    </button>
-                    <button class="btn btn-outline-danger"
-                            title="Delete"
-                            @onclick="() => _deleteModal.Show(item)">
-                        <i class="bi bi-trash-fill fs-5"></i>
-                    </button>
+        <div class="position-relative" style="height:500px;">
 
-                </TemplateColumn>
-            </QuickGrid>
+            @if (_isLoading)
+            {
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center grid-overlay fade-in">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2 fw-bold text-primary">Refreshing...</div>
+                    </div>
+                </div>
+            }
+
+            <div class="grid-container @(_isLoading ? "grid-loading-blur" : "")">
+                <QuickGrid @ref="_grid" Class="table table-hover grid-custom" Virtualize="true" Items="@_items" ItemSize="30">
+                    <PropertyColumn TGridItem="ShoppingListItem" TProp="string" Property="s => s.Product!.Name" Title="Product" />
+                    <PropertyColumn TGridItem="ShoppingListItem" TProp="int" Property="s => s.Quantity" Title="Quantity" />
+                    <TemplateColumn Context="item" Title="Actions" Align="Align.Center">
+                        <button class="btn btn-outline-warning"
+                                title="Edit"
+                                @onclick="() => _editItemModal.OpenModal(item)">
+                            <i class="bi bi-pencil-square fs-5"></i>
+                        </button>
+                        <button class="btn btn-outline-danger"
+                                title="Delete"
+                                @onclick="() => _deleteModal.Show(item)">
+                            <i class="bi bi-trash-fill fs-5"></i>
+                        </button>
+
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
     </div>
 
