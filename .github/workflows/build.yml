@@ -35,7 +35,7 @@ jobs:
 
     # 2. TEST REPORTER (Visualizes the .trx file in GitHub)
     - name: Test Report
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v3
       if: always() # Ensures the report is created even if tests fail
       with:
         name: .NET Test Results
