@@ -9,8 +9,51 @@
 <h1>My Home Catalogus</h1>
 
 <br />
+<AuthorizeView>
+	<Authorized>
+		<AuthorizeView Policy="ApprovedOnly" Context="approvedcontext">
+			<Authorized>
+				@foreach (var widgetType in Widgets)
+				{
+					<DynamicComponent Type="widgetType" />
+				}
+			</Authorized>
+            
+			<NotAuthorized>
+				<div class="alert alert-info shadow-sm d-flex align-items-center" role="alert">
+					<span class="bi bi-hourglass-split fs-4 me-3"></span>
+					<div>
+						<strong>Account Pending:</strong> Your account is currently awaiting administrator approval. 
+						You will have access to your dashboard once a manager verifies your request.
+					</div>
+				</div>
+			</NotAuthorized>
+		</AuthorizeView>
+	</Authorized>
 
-@foreach (var widgetType in Widgets)
-{
-    <DynamicComponent Type="widgetType"></DynamicComponent>
-}
+	<NotAuthorized>
+		<div class="card bg-light border-0">
+			<div class="card-body text-center py-5">
+				<p class="text-muted">Log in to get an overview of the current status.</p>
+				<a href="Account/Login" class="btn btn-primary">Sign In</a>
+			</div>
+		</div>
+	</NotAuthorized>
+</AuthorizeView>
+
+@* <AuthorizeView>
+	<Authorized>
+
+		@foreach (var widgetType in Widgets)
+		{
+			<DynamicComponent Type="widgetType"></DynamicComponent>
+		}
+
+	</Authorized>
+
+    <NotAuthorized>
+        Log in to get an overview of the current status
+    </NotAuthorized>
+
+</AuthorizeView>
+ *@

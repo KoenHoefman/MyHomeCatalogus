@@ -1,0 +1,76 @@
+﻿@page "/admin/user-management"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Roles = RoleConstants.Admin)]
+
+<h3>User Management</h3>
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @_errorMessage
+        <button type="button" class="btn-close" @onclick="() => _errorMessage = null"></button>
+    </div>
+}
+
+@if (_userItems == null || _userItems.Count == 0)
+{
+    <p>Loading users...</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover grid-custom">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in _userItems)
+                {
+                    <tr>
+                        <td>@item.User.Email</td>
+                        <td>
+                            <span class="badge @(item.User.IsApproved ? "bg-success" : "bg-secondary")">
+                                @(item.User.IsApproved ? "Approved" : "Pending")
+                            </span>
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm"
+                                    @onchange="(ChangeEventArgs e) => HandleRoleChange(item.User, e)"
+                                    disabled="@(item.User.Id == _currentUserId)">
+                                <option value="">-- Role --</option>
+                                <option value="@RoleConstants.Admin" selected="@item.IsAdmin">Admin</option>
+                                <option value="@RoleConstants.RegularUser" selected="@item.IsRegularUser">User</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm @(item.User.IsApproved ? "btn-outline-danger" : "btn-success")"
+                                    disabled="@(item.User.Id == _currentUserId)"
+                                    @onclick="() => ToggleApproval(item.User)">
+                                @(item.User.IsApproved ? "Revoke Access" : "Approve User")
+                            </button>
+
+                            <button class="btn btn-sm btn-danger ms-2"
+                                    disabled="@(item.User.Id == _currentUserId)"
+                                    @onclick="() => _deleteModal.Show(item.User)">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+}
+<ConfirmationModal TItem="ApplicationUser"
+                   @ref="_deleteModal"
+                   Message="Are you sure you want to permanently delete this user?"
+                   AcceptButtonText="Delete User"
+                   OnConfirmed="DeleteUser" />

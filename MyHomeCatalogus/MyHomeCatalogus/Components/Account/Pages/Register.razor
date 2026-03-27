@@ -47,13 +47,14 @@
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
     </div>
-    <div class="col-md-6 col-md-offset-2">
+    @*     <div class="col-md-6 col-md-offset-2">
         <section>
             <h3>Use another service to register.</h3>
             <hr />
             <ExternalLoginPicker />
         </section>
     </div>
+ *@
 </div>
 
 @code {
@@ -75,8 +76,14 @@
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-        // To not lock myself out after deployment: first user is auto-approved
-        user.IsApproved = !UserManager.Users.Any();
+        // To not lock myself out after deployment: first user is auto-approved and gets Admin role
+        var isFirstUser = !UserManager.Users.Any();
+
+        if (isFirstUser)
+        {
+            user.IsApproved = true;
+            user.EmailConfirmed = true;
+        }
 
         var result = await UserManager.CreateAsync(user, Input.Password);
 
@@ -86,22 +93,37 @@
             return;
         }
 
+        // Assign role
+        var roleToAssign = isFirstUser ? RoleConstants.Admin : RoleConstants.RegularUser;
+        var roleResult = await UserManager.AddToRoleAsync(user, roleToAssign);
+
+        if (!roleResult.Succeeded)
+        {
+            Logger.LogError("Failed to assign role {Role} to user {UserId}: {Errors}",
+                roleToAssign, user.Id, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+            identityErrors = roleResult.Errors;
+            return;
+        }
+
         Logger.LogInformation("User created a new account with password.");
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
+        if (!isFirstUser)
         {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            var userId = await UserManager.GetUserIdAsync(user);
+            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+
+            await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+            if (UserManager.Options.SignIn.RequireConfirmedAccount)
+            {
+                RedirectManager.RedirectTo(
+                    "Account/RegisterConfirmation",
+                    new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            }
         }
 
         await SignInManager.SignInAsync(user, isPersistent: false);
