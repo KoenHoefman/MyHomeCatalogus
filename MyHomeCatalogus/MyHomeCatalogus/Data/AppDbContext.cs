@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MyHomeCatalogus.Shared.Domain;
 using System.Reflection;
 
 namespace MyHomeCatalogus.Data
 {
-	public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+	public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 	{
 		public DbSet<Product> Products { get; set; }
 		public DbSet<ProductType> ProductTypes { get; set; }

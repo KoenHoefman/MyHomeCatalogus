@@ -1,0 +1,32 @@
+﻿@page "/Account/LoggedOut"
+
+@using Microsoft.AspNetCore.Identity
+@using MyHomeCatalogus.Data
+
+@attribute [AllowAnonymous]
+
+@inject SignInManager<ApplicationUser> SignInManager
+
+<PageTitle>Logged out</PageTitle>
+
+<div class="container mt-5">
+	<div class="alert alert-success shadow-sm" role="alert">
+		<h4 class="alert-heading"><span class="bi bi-check-circle-fill me-2"></span>Logged out</h4>
+		<p>You have successfully logged out of MyHomeCatalogus.</p>
+		<hr>
+        <p class="mb-0">
+            <a href="/" class="btn btn-success mt-2">Return Home</a>
+        </p>
+		<p class="mb-0">
+			<a href="/Account/login" class="btn btn-success mt-2">Log in</a>
+		</p>
+    </div>
+</div>
+
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		// Clear the authentication cookie
+		await SignInManager.SignOutAsync();
+	}
+}
