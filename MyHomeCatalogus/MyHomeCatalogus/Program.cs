@@ -91,6 +91,7 @@ builder.Services.AddScoped<IAuthorizationHandler, ApprovedUserHandler>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddTransient<IEmailService, EmailSender>();
+builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
 
 builder.Services.AddAuthorizationBuilder()
 	.AddPolicy("ApprovedOnly", policy =>

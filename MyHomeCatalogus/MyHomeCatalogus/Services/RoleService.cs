@@ -6,25 +6,27 @@ namespace MyHomeCatalogus.Services
 {
 	public class RoleService(UserManager<ApplicationUser> userManager) : IRoleService
 	{
+		private readonly UserManager<ApplicationUser> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+
 		public async Task AssignRoleAsync(ApplicationUser user, string roleName)
 		{
-			if (!await userManager.IsInRoleAsync(user, roleName))
+			if (!await _userManager.IsInRoleAsync(user, roleName))
 			{
-				await userManager.AddToRoleAsync(user, roleName);
+				await _userManager.AddToRoleAsync(user, roleName);
 			}
 		}
 
 		public async Task RemoveRoleAsync(ApplicationUser user, string roleName)
 		{
-			if (await userManager.IsInRoleAsync(user, roleName))
+			if (await _userManager.IsInRoleAsync(user, roleName))
 			{
-				await userManager.RemoveFromRoleAsync(user, roleName);
+				await _userManager.RemoveFromRoleAsync(user, roleName);
 			}
 		}
 
 		public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user)
 		{
-			return await userManager.GetRolesAsync(user);
+			return await _userManager.GetRolesAsync(user);
 		}
 	}
 }
