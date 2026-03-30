@@ -14,12 +14,9 @@ namespace MyHomeCatalogus.UnitTests.Authorization.Roles
         {
             return new Mock<RoleManager<IdentityRole>>(
                 Mock.Of<IRoleStore<IdentityRole>>(),
-                Mock.Of<IOptions<IdentityOptions>>(),
-                Mock.Of<IPasswordHasher<IdentityRole>>(),
                 new List<IRoleValidator<IdentityRole>>(),
                 Mock.Of<ILookupNormalizer>(),
                 Mock.Of<IdentityErrorDescriber>(),
-                Mock.Of<IServiceProvider>(),
                 Mock.Of<ILogger<RoleManager<IdentityRole>>>());
         }
 
