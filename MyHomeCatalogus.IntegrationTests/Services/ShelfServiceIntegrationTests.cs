@@ -2,7 +2,6 @@
 using MyHomeCatalogus.IntegrationTests.Base;
 using MyHomeCatalogus.Services;
 using MyHomeCatalogus.Shared.Domain;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 

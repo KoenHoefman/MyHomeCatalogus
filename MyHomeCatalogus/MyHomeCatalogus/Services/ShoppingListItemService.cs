@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MyHomeCatalogus.Data;
 using MyHomeCatalogus.Interfaces;
 using MyHomeCatalogus.Shared.Domain;
