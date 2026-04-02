@@ -14,8 +14,14 @@ using MyHomeCatalogus.Email;
 using MyHomeCatalogus.Interfaces;
 using MyHomeCatalogus.Services;
 using MyHomeCatalogus.Settings;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+builder.Host.UseSerilog((context, services, configuration) =>
+	configuration.ReadFrom.Configuration(context.Configuration)
+);
 
 // Add services to the container.
 builder.Services.AddRazorComponents(options =>
@@ -41,10 +47,12 @@ var connectionString =
 	builder.Configuration.GetConnectionString("DefaultConnection")
 	?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.Services.AddDbContextFactory<AppDbContext>(options =>
+builder.Services.AddSingleton<StockItemAuditInterceptor>();
+
+builder.Services.AddDbContextFactory<AppDbContext>((serviceProvider, options) =>
 	options.UseSqlServer(connectionString)
-		.AddInterceptors(new StockItemAuditInterceptor())
-	);
+		.AddInterceptors(serviceProvider.GetRequiredService<StockItemAuditInterceptor>())
+);
 
 //Appsettings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -66,7 +74,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 	.AddSignInManager()
 	.AddDefaultTokenProviders();
 
-builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
+builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
 
 //Services
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -90,7 +98,7 @@ builder.Services.AddScoped<IToastService, ToastService>();
 builder.Services.AddScoped<IAuthorizationHandler, ApprovedUserHandler>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
-builder.Services.AddTransient<IEmailService, EmailSender>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
 
 builder.Services.AddAuthorizationBuilder()

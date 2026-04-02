@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -24,20 +23,30 @@ namespace MyHomeCatalogus.UnitTests.Services
                 Mock.Of<IServiceProvider>(),
                 Mock.Of<ILogger<UserManager<ApplicationUser>>>());
         }
+    [Fact]
+    public void Ctor_Should_Throw_When_Logger_Is_Null()
+    {
+        var mockUserManager = CreateUserManagerMock();
+        ILogger<RoleService> nullLogger = null!;
+
+        Assert.Throws<ArgumentNullException>(() => new RoleService(mockUserManager.Object, nullLogger));
+    }
+
+
 
         [Fact]
         public void Ctor_Should_Throw_When_UserManager_Is_Null()
         {
             UserManager<ApplicationUser> nullUserManager = null!;
 
-            Assert.Throws<ArgumentNullException>(() => new RoleService(nullUserManager));
+            Assert.Throws<ArgumentNullException>(() => new RoleService(nullUserManager, Mock.Of<ILogger<RoleService>>()));
         }
 
         [Fact]
         public async Task AssignRoleAsync_Should_AddRole_When_UserNotInRole()
         {
             var userManager = CreateUserManagerMock();
-            var service = new RoleService(userManager.Object);
+            var service = new RoleService(userManager.Object, Mock.Of<ILogger<RoleService>>());
             var user = new ApplicationUser { Id = "user1" };
             var roleName = "TestRole";
 
@@ -53,7 +62,7 @@ namespace MyHomeCatalogus.UnitTests.Services
         public async Task AssignRoleAsync_Should_NotAddRole_When_UserAlreadyInRole()
         {
             var userManager = CreateUserManagerMock();
-            var service = new RoleService(userManager.Object);
+            var service = new RoleService(userManager.Object, Mock.Of<ILogger<RoleService>>());
             var user = new ApplicationUser { Id = "user1" };
             var roleName = "TestRole";
 
@@ -68,7 +77,7 @@ namespace MyHomeCatalogus.UnitTests.Services
         public async Task RemoveRoleAsync_Should_RemoveRole_When_UserInRole()
         {
             var userManager = CreateUserManagerMock();
-            var service = new RoleService(userManager.Object);
+            var service = new RoleService(userManager.Object, Mock.Of<ILogger<RoleService>>());
             var user = new ApplicationUser { Id = "user1" };
             var roleName = "TestRole";
 
@@ -84,7 +93,7 @@ namespace MyHomeCatalogus.UnitTests.Services
         public async Task RemoveRoleAsync_Should_NotRemoveRole_When_UserNotInRole()
         {
             var userManager = CreateUserManagerMock();
-            var service = new RoleService(userManager.Object);
+            var service = new RoleService(userManager.Object, Mock.Of<ILogger<RoleService>>());
             var user = new ApplicationUser { Id = "user1" };
             var roleName = "TestRole";
 
@@ -99,7 +108,7 @@ namespace MyHomeCatalogus.UnitTests.Services
         public async Task GetUserRolesAsync_Should_ReturnUserRoles()
         {
             var userManager = CreateUserManagerMock();
-            var service = new RoleService(userManager.Object);
+            var service = new RoleService(userManager.Object, Mock.Of<ILogger<RoleService>>());
             var user = new ApplicationUser { Id = "user1" };
             var expectedRoles = new List<string> { "Role1", "Role2" };
 

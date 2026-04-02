@@ -12,35 +12,55 @@ namespace MyHomeCatalogus.Services;
 public class RoomService : IRoomService
 {
 	private readonly IDbContextFactory<AppDbContext> _contextFactory;
+	private readonly ILogger<RoomService> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RoomService"/> class.
 	/// </summary>
 	/// <param name="contextFactory">The factory used to create <see cref="AppDbContext"/> instances.</param>
+	/// <param name="logger">The logger for logging errors.</param>
 	/// <exception cref="ArgumentNullException">Thrown when <paramref name="contextFactory"/> is null.</exception>
-	public RoomService(IDbContextFactory<AppDbContext> contextFactory)
+	public RoomService(IDbContextFactory<AppDbContext> contextFactory, ILogger<RoomService> logger)
 	{
 		ArgumentNullException.ThrowIfNull(contextFactory);
+		ArgumentNullException.ThrowIfNull(logger);
 
 		_contextFactory = contextFactory;
+		_logger = logger;
 	}
 
 	/// <inheritdoc />
 	public async Task<IEnumerable<Room>> GetAll()
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.Rooms.ToListAsync();
+			return await context.Rooms.ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving all rooms.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <exception cref="KeyNotFoundException">Thrown when no room with the specified ID is found.</exception>
 	public async Task<Room> Get(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.Rooms.FindAsync(id)
-			   ?? throw new KeyNotFoundException($"Room with Id {id} not found");
+			return await context.Rooms.FindAsync(id)
+				   ?? throw new KeyNotFoundException($"Room with Id {id} not found");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving room with Id {RoomId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -57,13 +77,21 @@ public class RoomService : IRoomService
 			throw new UniqueConstraintException("Invalid Room", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		var addedEntity = context.Rooms.Add(item);
+			var addedEntity = context.Rooms.Add(item);
 
-		await context.SaveChangesAsync();
+			await context.SaveChangesAsync();
 
-		return addedEntity.Entity;
+			return addedEntity.Entity;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error adding room.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -81,55 +109,77 @@ public class RoomService : IRoomService
 			throw new UniqueConstraintException("Invalid Room", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var foundEntity = await context.Rooms.FindAsync(item.Id);
-
-		if (foundEntity is not null)
+		try
 		{
-			context.Entry(foundEntity).CurrentValues.SetValues(item);
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-			await context.SaveChangesAsync();
+			var foundEntity = await context.Rooms.FindAsync(item.Id);
+
+			if (foundEntity is not null)
+			{
+				context.Entry(foundEntity).CurrentValues.SetValues(item);
+				await context.SaveChangesAsync();
+			}
+
+			return foundEntity ?? throw new KeyNotFoundException($"Room with Id {item.Id} not found");
 		}
-
-		return foundEntity ?? throw new KeyNotFoundException($"Room with Id {item.Id} not found");
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error updating room with Id {RoomId}.", item.Id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <remarks>This operation is idempotent; if the ID does not exist, the method completes without error.</remarks>
 	public async Task Delete(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var foundEntity = await context.Rooms.FirstOrDefaultAsync(p => p.Id == id);
-
-		if (foundEntity == null)
+		try
 		{
-			return;
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			var foundEntity = await context.Rooms.FirstOrDefaultAsync(p => p.Id == id);
+
+			if (foundEntity == null)
+			{
+				return;
+			}
+
+			//Cascading delete will remove all linked storage units
+			context.Rooms.Remove(foundEntity);
+			await context.SaveChangesAsync();
 		}
-
-		//Cascading delete will remove all linked storage units
-		context.Rooms.Remove(foundEntity);
-
-		await context.SaveChangesAsync();
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error deleting room with Id {RoomId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	public async Task<List<(string PropertyName, string ErrorMessage)>> ValidateItem(Room item)
 	{
-		var returnValue = new List<(string PropertyName, string ErrorMessage)>();
-
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		//Unique index on Name
-		var duplicate = await context.Rooms
-			.AnyAsync(s => s.Name == item.Name && s.Id != item.Id);
-
-		if (duplicate)
+		try
 		{
-			returnValue.Add((nameof(item.Name), "A room with this name already exists."));
-		}
+			var returnValue = new List<(string PropertyName, string ErrorMessage)>();
 
-		return returnValue;
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			//Unique index on Name
+			var duplicate = await context.Rooms
+				.AnyAsync(s => s.Name == item.Name && s.Id != item.Id);
+
+			if (duplicate)
+			{
+				returnValue.Add((nameof(item.Name), "A room with this name already exists."));
+			}
+
+			return returnValue;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error validating room.");
+			throw;
+		}
 	}
 }

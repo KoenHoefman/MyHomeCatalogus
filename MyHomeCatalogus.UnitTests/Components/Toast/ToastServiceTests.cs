@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MyHomeCatalogus.Components.Toast;
 using Xunit;
 

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,88 +10,128 @@ using Xunit;
 
 namespace MyHomeCatalogus.UnitTests.Services
 {
-    public class UserNotificationServiceTests
-    {
-        private Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
-        {
-            return new Mock<UserManager<ApplicationUser>>(
-                Mock.Of<IUserStore<ApplicationUser>>(),
-                Mock.Of<IOptions<IdentityOptions>>(),
-                Mock.Of<IPasswordHasher<ApplicationUser>>(),
-                new List<IUserValidator<ApplicationUser>>(),
-                new List<IPasswordValidator<ApplicationUser>>(),
-                Mock.Of<ILookupNormalizer>(),
-                Mock.Of<IdentityErrorDescriber>(),
-                Mock.Of<IServiceProvider>(),
-                Mock.Of<ILogger<UserManager<ApplicationUser>>>());
-        }
+	public class UserNotificationServiceTests
+	{
+		private Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
+		{
+			return new Mock<UserManager<ApplicationUser>>(
+				Mock.Of<IUserStore<ApplicationUser>>(),
+				Mock.Of<IOptions<IdentityOptions>>(),
+				Mock.Of<IPasswordHasher<ApplicationUser>>(),
+				new List<IUserValidator<ApplicationUser>>(),
+				new List<IPasswordValidator<ApplicationUser>>(),
+				Mock.Of<ILookupNormalizer>(),
+				Mock.Of<IdentityErrorDescriber>(),
+				Mock.Of<IServiceProvider>(),
+				Mock.Of<ILogger<UserManager<ApplicationUser>>>());
+		}
 
-        [Fact]
-        public async Task NotifyAdminsNewUserConfirmedAsync_SendsEmailToAllAdmins()
-        {
-            var userManager = CreateUserManagerMock();
 
-            var admin1 = new ApplicationUser { Id = "admin1", UserName = "admin1", Email = "admin1@example.com" };
-            var admin2 = new ApplicationUser { Id = "admin2", UserName = "admin2", Email = "admin2@example.com" };
+		[Fact]
+		public void Ctor_Should_Throw_When_UserManager_Is_Null()
+		{
+			var emailServiceMock = new Mock<IEmailService>();
+			var loggerMock = new Mock<ILogger<UserNotificationService>>()!;
 
-            userManager
-                .Setup(x => x.GetUsersInRoleAsync(RoleConstants.Admin))
-                .ReturnsAsync(new List<ApplicationUser> { admin1, admin2 });
+			Assert.Throws<ArgumentNullException>(() => new UserNotificationService(null!, emailServiceMock.Object, loggerMock.Object));
+		}
 
-            var emailService = new Mock<IEmailService>();
-            var logger = new Mock<ILogger<UserNotificationService>>();
-            var service = new UserNotificationService(userManager.Object, emailService.Object, logger.Object);
+		[Fact]
+		public void Ctor_Should_Throw_When_EmailService_Is_Null()
+		{
+			var userManagerMock = CreateUserManagerMock();
+			var loggerMock = new Mock<ILogger<UserNotificationService>>()!;
 
-            var newUser = new ApplicationUser { Id = "newuser", UserName = "newuser", Email = "newuser@example.com" };
+			Assert.Throws<ArgumentNullException>(() => new UserNotificationService(userManagerMock.Object, null!, loggerMock.Object));
+		}
 
-            await service.NotifyAdminsNewUserConfirmedAsync(newUser);
+		[Fact]
+		public void Ctor_Should_Throw_When_Logger_Is_Null()
+		{
+			var userManagerMock = CreateUserManagerMock();
+			var emailServiceMock = new Mock<IEmailService>();
 
-            emailService.Verify(x => x.SendEmailAsync("admin1@example.com", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            emailService.Verify(x => x.SendEmailAsync("admin2@example.com", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-        }
+			Assert.Throws<ArgumentNullException>(() => new UserNotificationService(userManagerMock.Object, emailServiceMock.Object, null!));
+		}
 
-        [Fact]
-        public async Task NotifyAdminsNewUserConfirmedAsync_SkipsAdminsWithoutEmail()
-        {
-            var userManager = CreateUserManagerMock();
+		[Fact]
+		public void Ctor_Should_Initialize_When_All_Parameters_Are_Not_Null()
+		{
+			var userManagerMock = CreateUserManagerMock();
+			var emailServiceMock = new Mock<IEmailService>();
+			var loggerMock = new Mock<ILogger<UserNotificationService>>()!;
 
-            var admin1 = new ApplicationUser { Id = "admin1", UserName = "admin1", Email = "" };
-            var admin2 = new ApplicationUser { Id = "admin2", UserName = "admin2", Email = "admin2@example.com" };
+			var service = new UserNotificationService(userManagerMock.Object, emailServiceMock.Object, loggerMock.Object);
 
-            userManager
-                .Setup(x => x.GetUsersInRoleAsync(RoleConstants.Admin))
-                .ReturnsAsync(new List<ApplicationUser> { admin1, admin2 });
+			Assert.NotNull(service);
+		}
 
-            var emailService = new Mock<IEmailService>();
-            var logger = new Mock<ILogger<UserNotificationService>>();
-            var service = new UserNotificationService(userManager.Object, emailService.Object, logger.Object);
+		[Fact]
+		public async Task NotifyAdminsNewUserConfirmedAsync_SendsEmailToAllAdmins()
+		{
+			var userManager = CreateUserManagerMock();
 
-            var newUser = new ApplicationUser { Id = "newuser", UserName = "newuser", Email = "newuser@example.com" };
+			var admin1 = new ApplicationUser { Id = "admin1", UserName = "admin1", Email = "admin1@example.com" };
+			var admin2 = new ApplicationUser { Id = "admin2", UserName = "admin2", Email = "admin2@example.com" };
 
-            await service.NotifyAdminsNewUserConfirmedAsync(newUser);
+			userManager
+				.Setup(x => x.GetUsersInRoleAsync(RoleConstants.Admin))
+				.ReturnsAsync(new List<ApplicationUser> { admin1, admin2 });
 
-            emailService.Verify(x => x.SendEmailAsync("admin2@example.com", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            emailService.Verify(x => x.SendEmailAsync("", It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        }
+			var emailService = new Mock<IEmailService>();
+			var logger = new Mock<ILogger<UserNotificationService>>();
+			var service = new UserNotificationService(userManager.Object, emailService.Object, logger.Object);
 
-        [Fact]
-        public async Task NotifyAdminsNewUserConfirmedAsync_NoAdmins_NoEmailsSent()
-        {
-            var userManager = CreateUserManagerMock();
+			var newUser = new ApplicationUser { Id = "newuser", UserName = "newuser", Email = "newuser@example.com" };
 
-            userManager
-                .Setup(x => x.GetUsersInRoleAsync(RoleConstants.Admin))
-                .ReturnsAsync(new List<ApplicationUser>());
+			await service.NotifyAdminsNewUserConfirmedAsync(newUser);
 
-            var emailService = new Mock<IEmailService>();
-            var logger = new Mock<ILogger<UserNotificationService>>();
-            var service = new UserNotificationService(userManager.Object, emailService.Object, logger.Object);
+			emailService.Verify(x => x.SendEmailAsync("admin1@example.com", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+			emailService.Verify(x => x.SendEmailAsync("admin2@example.com", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+		}
 
-            var newUser = new ApplicationUser { Id = "newuser", UserName = "newuser", Email = "newuser@example.com" };
+		[Fact]
+		public async Task NotifyAdminsNewUserConfirmedAsync_SkipsAdminsWithoutEmail()
+		{
+			var userManager = CreateUserManagerMock();
 
-            await service.NotifyAdminsNewUserConfirmedAsync(newUser);
+			var admin1 = new ApplicationUser { Id = "admin1", UserName = "admin1", Email = "" };
+			var admin2 = new ApplicationUser { Id = "admin2", UserName = "admin2", Email = "admin2@example.com" };
 
-            emailService.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        }
-    }
+			userManager
+				.Setup(x => x.GetUsersInRoleAsync(RoleConstants.Admin))
+				.ReturnsAsync(new List<ApplicationUser> { admin1, admin2 });
+
+			var emailService = new Mock<IEmailService>();
+			var logger = new Mock<ILogger<UserNotificationService>>();
+			var service = new UserNotificationService(userManager.Object, emailService.Object, logger.Object);
+
+			var newUser = new ApplicationUser { Id = "newuser", UserName = "newuser", Email = "newuser@example.com" };
+
+			await service.NotifyAdminsNewUserConfirmedAsync(newUser);
+
+			emailService.Verify(x => x.SendEmailAsync("admin2@example.com", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+			emailService.Verify(x => x.SendEmailAsync("", It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+		}
+
+		[Fact]
+		public async Task NotifyAdminsNewUserConfirmedAsync_NoAdmins_NoEmailsSent()
+		{
+			var userManager = CreateUserManagerMock();
+
+			userManager
+				.Setup(x => x.GetUsersInRoleAsync(RoleConstants.Admin))
+				.ReturnsAsync(new List<ApplicationUser>());
+
+			var emailService = new Mock<IEmailService>();
+			var logger = new Mock<ILogger<UserNotificationService>>();
+			var service = new UserNotificationService(userManager.Object, emailService.Object, logger.Object);
+
+			var newUser = new ApplicationUser { Id = "newuser", UserName = "newuser", Email = "newuser@example.com" };
+
+			await service.NotifyAdminsNewUserConfirmedAsync(newUser);
+
+			emailService.Verify(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+		}
+	}
 }

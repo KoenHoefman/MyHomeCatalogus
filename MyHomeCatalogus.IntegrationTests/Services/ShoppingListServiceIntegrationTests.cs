@@ -2,6 +2,7 @@
 using MyHomeCatalogus.IntegrationTests.Base;
 using MyHomeCatalogus.Services;
 using MyHomeCatalogus.Shared.Domain;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace MyHomeCatalogus.IntegrationTests.Services
@@ -12,7 +13,7 @@ namespace MyHomeCatalogus.IntegrationTests.Services
 		private ShoppingListService CreateShoppingListService()
 		{
 			var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
-			return new ShoppingListService(contextFactory);
+			return new ShoppingListService(contextFactory, NullLogger<ShoppingListService>.Instance);
 		}
 
 		#region GetAll
