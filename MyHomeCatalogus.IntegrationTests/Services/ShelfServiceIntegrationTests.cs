@@ -2,6 +2,8 @@
 using MyHomeCatalogus.IntegrationTests.Base;
 using MyHomeCatalogus.Services;
 using MyHomeCatalogus.Shared.Domain;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace MyHomeCatalogus.IntegrationTests.Services
@@ -12,7 +14,7 @@ namespace MyHomeCatalogus.IntegrationTests.Services
 		private ShelfService CreateShelfService()
 		{
 			var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
-			return new ShelfService(contextFactory);
+			return new ShelfService(contextFactory, NullLogger<ShelfService>.Instance);
 		}
 
 		#region GetAll

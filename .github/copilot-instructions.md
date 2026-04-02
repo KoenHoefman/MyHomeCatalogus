@@ -11,6 +11,7 @@ This repository enforces project coding, formatting, and architecture preference
 - **Target Framework:** .NET 8 (Default for current project). Use the latest stable .NET/C# features only for new solutions.
 - **Architecture:** Blazor (Server interactive components) and WebAssembly projects.
 - **Patterns:** Prefer idiomatic Blazor patterns (Components, Dependency Injection, AuthenticationState, RenderModes).
+- **Core Principles:** Strictly adhere to **SOLID** and **KISS** (Keep It Simple, Stupid).
 
 ## Formatting & Editor Settings (Authoritative)
 - **Indentation:** Use **Tabs** for indentation.
@@ -29,6 +30,7 @@ This repository enforces project coding, formatting, and architecture preference
   - **Using Directives:** Place outside the namespace. Use simple `using var` statements where applicable.
   - **Var Guideline:** Prefer `var` for built-in types and when the type is apparent; otherwise, be explicit.
   - **Modern Features:** Prefer null-propagation, coalesce expressions, and object/collection initializers.
+  - **Dependencies:** List required NuGet packages. Use existing libraries first. Open-source must be free for home/personal use.
 
 ## Blazor & Component Guidelines
 - **Rendering:** Be explicit with `@rendermode` for server interactive components (e.g., `@rendermode InteractiveServer`).
@@ -58,10 +60,20 @@ This repository enforces project coding, formatting, and architecture preference
 - **Framework:** Use **xUnit** for unit/integration testing.
 - **Mocking:** Use **Moq** for mocking dependencies.
 - **Workflow:** Ensure `dotnet format` respects `.editorconfig` before committing. Keep changes minimal and focused.
+- **Coverage:** Create necessary unit and integration tests. Avoid "unnecessary" or redundant tests that don't add value.
+- **Verification:** Ensure all tests (unit and integration) pass before finalizing a suggestion.
 
 ## When in Doubt
 - Follow `.editorconfig` strictly.
 - Ask for clarification if changes affect architecture, authentication, or cross-cutting concerns.
+
+## AI Interaction & Reporting
+- **Workflow:** Before complex changes, list all suggestions first and wait for user selection.
+- **Post-Task Overview:** At the end of every response, provide:
+  1. **What was done:** A summary of the changes and **why** they were implemented that way.
+  2. **To-Do List:** An overview of remaining tasks or manual steps the user needs to take.
+- **Sources:** Always cite **Microsoft Learn** (MSDN) links targeting the used target framework.
+- **Error Handling:** If a solution fails, do not iterate on failed code; search for a fresh, better solution.
 
 ## AI Interaction & Documentation
 - **Error Handling:** If a suggested solution fails, do not iterate on the failed code. Search for a fresh, better solution from the original requirement.
@@ -78,3 +90,11 @@ This repository enforces project coding, formatting, and architecture preference
 - **Parameter Objects:** If more than 5 parameters are needed, refactor them into a dedicated class or record to hold the state.
 - **Best Practices:** All solutions must align with industry-standard "Best Practices" for .NET 8 (or haigher) and Blazor.
 - **UI:** If the project uses **Bootstrap** for styling; ensure component markup reflects this.
+- **Logging:** Add logging where necessary for errorhandling and traceability, but **do not overdo it**. Use preferably serilog.
+- **Build Quality:** Treat all warnings as errors during the build process.
+
+## Git & Version Control
+- **Branching:** Never work directly on the `main` branch.
+- **New Features:** Always branch from `main` using `feature/descriptive_name` if asked to create a branch.
+- **Bug Fixes:** Always branch from `main` using `bugfix/descriptive_name` if asked to create a branch.
+- **Commits:** Do **not** suggest or perform commits without explicit user approval.

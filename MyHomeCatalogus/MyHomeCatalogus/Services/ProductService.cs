@@ -13,16 +13,20 @@ namespace MyHomeCatalogus.Services;
 public class ProductService : IProductService
 {
 	private readonly IDbContextFactory<AppDbContext> _contextFactory;
+	private readonly ILogger<ProductService> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ProductService"/> class.
 	/// </summary>
 	/// <param name="contextFactory">The factory used to create <see cref="AppDbContext"/> instances.</param>
+	/// <param name="logger">The logger for logging errors.</param>
 	/// <exception cref="ArgumentNullException">Thrown when <paramref name="contextFactory"/> is null.</exception>
-	public ProductService(IDbContextFactory<AppDbContext> contextFactory)
+	public ProductService(IDbContextFactory<AppDbContext> contextFactory, ILogger<ProductService> logger)
 	{
 		ArgumentNullException.ThrowIfNull(contextFactory);
+		ArgumentNullException.ThrowIfNull(logger);
 		_contextFactory = contextFactory;
+		_logger = logger;
 	}
 
 	/// <summary>
@@ -32,31 +36,55 @@ public class ProductService : IProductService
 	/// <returns>A collection of filtered products.</returns>
 	public async Task<IEnumerable<Product>> GetAll(Expression<Func<Product, bool>>? filter)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-		IQueryable<Product> query = context.Products;
-
-		if (filter != null)
+		try
 		{
-			query = query.Where(filter);
-		}
+			await using var context = await _contextFactory.CreateDbContextAsync();
+			IQueryable<Product> query = context.Products;
 
-		return await query.ToListAsync();
+			if (filter != null)
+			{
+				query = query.Where(filter);
+			}
+
+			return await query.ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving filtered products.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	public async Task<IEnumerable<Product>> GetAll()
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-		return await context.Products.ToListAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
+			return await context.Products.ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving all products.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <exception cref="KeyNotFoundException">Thrown when no product with the specified ID is found.</exception>
 	public async Task<Product> Get(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-		return await context.Products.FindAsync(id)
-			   ?? throw new KeyNotFoundException($"Product with Id {id} not found");
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
+			return await context.Products.FindAsync(id)
+				   ?? throw new KeyNotFoundException($"Product with Id {id} not found");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving product with Id {ProductId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -72,11 +100,19 @@ public class ProductService : IProductService
 			throw new UniqueConstraintException("Invalid Product", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
-		var addedEntity = context.Products.Add(item);
-		await context.SaveChangesAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
+			var addedEntity = context.Products.Add(item);
 
-		return addedEntity.Entity;
+			await context.SaveChangesAsync();
+			return addedEntity.Entity;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error saving new product.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -93,47 +129,74 @@ public class ProductService : IProductService
 			throw new UniqueConstraintException("Invalid Product", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
-		var foundEntity = await context.Products.FindAsync(item.Id);
-
-		if (foundEntity is not null)
+		try
 		{
-			context.Entry(foundEntity).CurrentValues.SetValues(item);
-			await context.SaveChangesAsync();
-		}
+			await using var context = await _contextFactory.CreateDbContextAsync();
+			var foundEntity = await context.Products.FindAsync(item.Id);
 
-		return foundEntity ?? throw new KeyNotFoundException($"Product with Id {item.Id} not found");
+			if (foundEntity is not null)
+			{
+				context.Entry(foundEntity).CurrentValues.SetValues(item);
+				await context.SaveChangesAsync();
+			}
+
+			return foundEntity ?? throw new KeyNotFoundException($"Product with Id {item.Id} not found");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error updating product with Id {ProductId}.", item.Id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <remarks>This operation is idempotent; if the ID does not exist, the method completes without error.</remarks>
 	public async Task Delete(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-		var foundEntity = await context.Products.FirstOrDefaultAsync(p => p.Id == id);
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
+			var foundEntity = await context.Products.FirstOrDefaultAsync(p => p.Id == id);
 
-		if (foundEntity == null) return;
+			if (foundEntity == null)
+			{
+				return;
+			}
 
-		context.Products.Remove(foundEntity);
-		await context.SaveChangesAsync();
+			context.Products.Remove(foundEntity);
+			await context.SaveChangesAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error deleting product with Id {ProductId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	public async Task<List<(string PropertyName, string ErrorMessage)>> ValidateItem(Product item)
 	{
-		var returnValue = new List<(string PropertyName, string ErrorMessage)>();
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		//Unique index on name per store
-		var duplicate = await context.Products
-			.AnyAsync(p => p.Name == item.Name && p.StoreId == item.StoreId && p.Id != item.Id);
-
-		if (duplicate)
+		try
 		{
-			returnValue.Add((nameof(item.Name), "A product with this name already exists for this store."));
-		}
+			var returnValue = new List<(string PropertyName, string ErrorMessage)>();
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return returnValue;
+			//Unique index on name per store
+			var duplicate = await context.Products
+				.AnyAsync(p => p.Name == item.Name && p.StoreId == item.StoreId && p.Id != item.Id);
+
+			if (duplicate)
+			{
+				returnValue.Add((nameof(item.Name), "A product with this name already exists for this store."));
+			}
+
+			return returnValue;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error validating product.");
+			throw;
+		}
 	}
 
 }

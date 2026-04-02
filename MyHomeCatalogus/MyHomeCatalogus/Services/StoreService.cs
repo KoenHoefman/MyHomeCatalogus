@@ -12,35 +12,55 @@ namespace MyHomeCatalogus.Services;
 public class StoreService : IStoreService
 {
 	private readonly IDbContextFactory<AppDbContext> _contextFactory;
+	private readonly ILogger<StoreService> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="StoreService"/> class.
 	/// </summary>
 	/// <param name="contextFactory">The factory used to create <see cref="AppDbContext"/> instances.</param>
+	/// <param name="logger">The logger for logging errors.</param>
 	/// <exception cref="ArgumentNullException">Thrown when <paramref name="contextFactory"/> is null.</exception>
-	public StoreService(IDbContextFactory<AppDbContext> contextFactory)
+	public StoreService(IDbContextFactory<AppDbContext> contextFactory, ILogger<StoreService> logger)
 	{
 		ArgumentNullException.ThrowIfNull(contextFactory);
+		ArgumentNullException.ThrowIfNull(logger);
 
 		_contextFactory = contextFactory;
+		_logger = logger;
 	}
 
 	/// <inheritdoc />
 	public async Task<IEnumerable<Store>> GetAll()
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.Stores.ToListAsync();
+			return await context.Stores.ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving all stores.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <exception cref="KeyNotFoundException">Thrown when no store with the specified ID is found.</exception>
 	public async Task<Store> Get(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.Stores.FindAsync(id)
-			   ?? throw new KeyNotFoundException($"Store with Id {id} not found");
+			return await context.Stores.FindAsync(id)
+				   ?? throw new KeyNotFoundException($"Store with Id {id} not found");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving store with Id {StoreId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -57,13 +77,21 @@ public class StoreService : IStoreService
 			throw new UniqueConstraintException("Invalid Store", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		var addedEntity = context.Stores.Add(item);
+			var addedEntity = context.Stores.Add(item);
 
-		await context.SaveChangesAsync();
+			await context.SaveChangesAsync();
 
-		return addedEntity.Entity;
+			return addedEntity.Entity;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error adding store.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -81,54 +109,76 @@ public class StoreService : IStoreService
 			throw new UniqueConstraintException("Invalid Store", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var foundEntity = await context.Stores.FindAsync(item.Id);
-
-		if (foundEntity is not null)
+		try
 		{
-			context.Entry(foundEntity).CurrentValues.SetValues(item);
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-			await context.SaveChangesAsync();
+			var foundEntity = await context.Stores.FindAsync(item.Id);
+
+			if (foundEntity is not null)
+			{
+				context.Entry(foundEntity).CurrentValues.SetValues(item);
+				await context.SaveChangesAsync();
+			}
+
+			return foundEntity ?? throw new KeyNotFoundException($"Store with Id {item.Id} not found");
 		}
-
-		return foundEntity ?? throw new KeyNotFoundException($"Store with Id {item.Id} not found");
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error updating store with Id {StoreId}.", item.Id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <remarks>This operation is idempotent; if the ID does not exist, the method completes without error.</remarks>
 	public async Task Delete(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var foundEntity = await context.Stores.FirstOrDefaultAsync(p => p.Id == id);
-
-		if (foundEntity == null)
+		try
 		{
-			return;
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			var foundEntity = await context.Stores.FirstOrDefaultAsync(p => p.Id == id);
+
+			if (foundEntity == null)
+			{
+				return;
+			}
+
+			context.Stores.Remove(foundEntity);
+			await context.SaveChangesAsync();
 		}
-
-		context.Stores.Remove(foundEntity);
-
-		await context.SaveChangesAsync();
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error deleting store with Id {StoreId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	public async Task<List<(string PropertyName, string ErrorMessage)>> ValidateItem(Store item)
 	{
-		var returnValue = new List<(string PropertyName, string ErrorMessage)>();
-
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		//Unique index on name
-		var duplicate = await context.Stores
-			.AnyAsync(s => s.Name == item.Name && s.Id != item.Id);
-
-		if (duplicate)
+		try
 		{
-			returnValue.Add((nameof(item.Name), "A store with this name already exists."));
-		}
+			var returnValue = new List<(string PropertyName, string ErrorMessage)>();
 
-		return returnValue;
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			//Unique index on name
+			var duplicate = await context.Stores
+				.AnyAsync(s => s.Name == item.Name && s.Id != item.Id);
+
+			if (duplicate)
+			{
+				returnValue.Add((nameof(item.Name), "A store with this name already exists."));
+			}
+
+			return returnValue;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error validating store.");
+			throw;
+		}
 	}
 }

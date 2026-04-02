@@ -12,25 +12,37 @@ namespace MyHomeCatalogus.Services;
 public class ShoppingListService : IShoppingListService
 {
 	private readonly IDbContextFactory<AppDbContext> _contextFactory;
+	private readonly ILogger<ShoppingListService> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ShoppingListService"/> class.
 	/// </summary>
 	/// <param name="contextFactory">The factory used to create <see cref="AppDbContext"/> instances.</param>
+	/// <param name="logger">The logger for logging errors.</param>
 	/// <exception cref="ArgumentNullException">Thrown when <paramref name="contextFactory"/> is null.</exception>
-	public ShoppingListService(IDbContextFactory<AppDbContext> contextFactory)
+	public ShoppingListService(IDbContextFactory<AppDbContext> contextFactory, ILogger<ShoppingListService> logger)
 	{
 		ArgumentNullException.ThrowIfNull(contextFactory);
+		ArgumentNullException.ThrowIfNull(logger);
 
 		_contextFactory = contextFactory;
+		_logger = logger;
 	}
 
 	/// <inheritdoc />
 	public async Task<IEnumerable<ShoppingList>> GetAll()
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.ShoppingLists.Include(p => p.Store).ToListAsync();
+			return await context.ShoppingLists.Include(p => p.Store).ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving all shopping lists.");
+			throw;
+		}
 	}
 
 
@@ -38,14 +50,22 @@ public class ShoppingListService : IShoppingListService
 	/// <exception cref="KeyNotFoundException">Thrown when no shopping list with the specified ID is found.</exception>
 	public async Task<ShoppingList> Get(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.ShoppingLists
+			return await context.ShoppingLists
 					   .Include(p => p.Store)
 					   .Include(p => p.ShoppingListItems)
 					   .ThenInclude(i => i.Product)
 					   .SingleOrDefaultAsync(p => p.Id == id)
 				   ?? throw new KeyNotFoundException($"ShoppingList with Id {id} not found");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving shopping list with Id {ShoppingListId}.", id);
+			throw;
+		}
 	}
 
 
@@ -63,13 +83,21 @@ public class ShoppingListService : IShoppingListService
 			throw new UniqueConstraintException("Invalid ShoppingList", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		var addedEntity = context.ShoppingLists.Add(item);
+			var addedEntity = context.ShoppingLists.Add(item);
 
-		await context.SaveChangesAsync();
+			await context.SaveChangesAsync();
 
-		return addedEntity.Entity;
+			return addedEntity.Entity;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error adding shopping list.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -81,113 +109,151 @@ public class ShoppingListService : IShoppingListService
 	{
 		ArgumentNullException.ThrowIfNull(item);
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		//Store can't be changed when there are items in the list
-		var existingList = await context.ShoppingLists
-			.Include(s => s.ShoppingListItems)
-			.FirstOrDefaultAsync(s => s.Id == item.Id);
-
-		if (existingList == null)
+		try
 		{
-			throw new KeyNotFoundException($"Shopping list with ID {item.Id} not found.");
-		}
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		if (existingList.ShoppingListItems.Any() && existingList.StoreId != item.StoreId)
+			//Store can't be changed when there are items in the list
+			var existingList = await context.ShoppingLists
+				.Include(s => s.ShoppingListItems)
+				.FirstOrDefaultAsync(s => s.Id == item.Id);
+
+			if (existingList == null)
+			{
+				throw new KeyNotFoundException($"Shopping list with ID {item.Id} not found.");
+			}
+
+			if (existingList.ShoppingListItems.Any() && existingList.StoreId != item.StoreId)
+			{
+				throw new InvalidOperationException("Cannot change the store because the shopping list already contains items.");
+			}
+
+			var validationErrors = await ValidateItem(item);
+
+			if (validationErrors.Any())
+			{
+				throw new UniqueConstraintException("Invalid ShoppingList", validationErrors);
+			}
+
+			var foundEntity = await context.ShoppingLists.FindAsync(item.Id);
+
+			if (foundEntity is not null)
+			{
+				context.Entry(foundEntity).CurrentValues.SetValues(item);
+				await context.SaveChangesAsync();
+			}
+
+			return foundEntity ?? throw new KeyNotFoundException($"ShoppingList with Id {item.Id} not found");
+		}
+		catch (Exception ex)
 		{
-			throw new InvalidOperationException("Cannot change the store because the shopping list already contains items.");
+			_logger.LogError(ex, "Error updating shopping list with Id {ShoppingListId}.", item.Id);
+			throw;
 		}
-
-		var validationErrors = await ValidateItem(item);
-
-		if (validationErrors.Any())
-		{
-			throw new UniqueConstraintException("Invalid ShoppingList", validationErrors);
-		}
-
-		var foundEntity = await context.ShoppingLists.FindAsync(item.Id);
-
-		if (foundEntity is not null)
-		{
-			context.Entry(foundEntity).CurrentValues.SetValues(item);
-
-			await context.SaveChangesAsync();
-		}
-
-		return foundEntity ?? throw new KeyNotFoundException($"ShoppingList with Id {item.Id} not found");
 	}
 
 	/// <inheritdoc />
 	/// <remarks>This operation is idempotent; if the ID does not exist, the method completes without error.</remarks>
 	public async Task Delete(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var foundEntity = await context.ShoppingLists.FirstOrDefaultAsync(p => p.Id == id);
-
-		if (foundEntity == null)
+		try
 		{
-			return;
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			var foundEntity = await context.ShoppingLists.FirstOrDefaultAsync(p => p.Id == id);
+
+			if (foundEntity == null)
+			{
+				return;
+			}
+
+			context.ShoppingLists.Remove(foundEntity);
+			await context.SaveChangesAsync();
 		}
-
-		context.ShoppingLists.Remove(foundEntity);
-
-		await context.SaveChangesAsync();
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error deleting shopping list with Id {ShoppingListId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	public async Task<IEnumerable<ShoppingList>> GetAllActiveShoppingLists()
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.ShoppingLists
-			.Where(p => !p.IsCompleted)
-			.Include(p => p.Store)
-			.ToListAsync();
+			return await context.ShoppingLists
+				.Where(p => !p.IsCompleted)
+				.Include(p => p.Store)
+				.ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving active shopping lists.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	public async Task<IEnumerable<ShoppingListWidgetData>> GetItemsCountForActiveShoppingLists()
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var activeLists = await context.ShoppingLists
-			.Where(p => !p.IsCompleted)
-			.Include(p => p.Store)
-			.Include(p => p.ShoppingListItems)
-			.AsNoTracking()
-			.ToListAsync();
-
-		var returnValue = new List<ShoppingListWidgetData>();
-
-		foreach (var shoppingList in activeLists)
+		try
 		{
-			returnValue.Add(new ShoppingListWidgetData(shoppingList));
-		}
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return returnValue;
+			var activeLists = await context.ShoppingLists
+				.Where(p => !p.IsCompleted)
+				.Include(p => p.Store)
+				.Include(p => p.ShoppingListItems)
+				.AsNoTracking()
+				.ToListAsync();
+
+			var returnValue = new List<ShoppingListWidgetData>();
+
+			foreach (var shoppingList in activeLists)
+			{
+				returnValue.Add(new ShoppingListWidgetData(shoppingList));
+			}
+
+			return returnValue;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error building active shopping list widget data.");
+			throw;
+		}
 	}
 
 
 	/// <inheritdoc />
 	public async Task<List<(string PropertyName, string ErrorMessage)>> ValidateItem(ShoppingList item)
 	{
-		var returnValue = new List<(string PropertyName, string ErrorMessage)>();
-
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		//Only 1 active list per store
-		if (!item.IsCompleted)
+		try
 		{
-			var duplicate = await context.ShoppingLists
-				.AnyAsync(s => s.StoreId == item.StoreId && !s.IsCompleted && s.Id != item.Id);
+			var returnValue = new List<(string PropertyName, string ErrorMessage)>();
 
-			if (duplicate)
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			//Only 1 active list per store
+			if (!item.IsCompleted)
 			{
-				returnValue.Add((nameof(item.StoreId), "There is already an active shoppinglist for this store."));
-			}
-		}
+				var duplicate = await context.ShoppingLists
+					.AnyAsync(s => s.StoreId == item.StoreId && !s.IsCompleted && s.Id != item.Id);
 
-		return returnValue;
+				if (duplicate)
+				{
+					returnValue.Add((nameof(item.StoreId), "There is already an active shoppinglist for this store."));
+				}
+			}
+
+			return returnValue;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error validating shopping list.");
+			throw;
+		}
 	}
 }

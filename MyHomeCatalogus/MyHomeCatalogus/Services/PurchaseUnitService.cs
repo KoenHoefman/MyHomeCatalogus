@@ -12,36 +12,56 @@ namespace MyHomeCatalogus.Services;
 public class PurchaseUnitService : IPurchaseUnitService
 {
 	private readonly IDbContextFactory<AppDbContext> _contextFactory;
+	private readonly ILogger<PurchaseUnitService> _logger;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="PurchaseUnitService"/> class.
 	/// </summary>
 	/// <param name="contextFactory">The factory used to create <see cref="AppDbContext"/> instances.</param>
+	/// <param name="logger">The logger for logging errors.</param>
 	/// <exception cref="ArgumentNullException">Thrown when <paramref name="contextFactory"/> is null.</exception>
-	public PurchaseUnitService(IDbContextFactory<AppDbContext> contextFactory)
+	public PurchaseUnitService(IDbContextFactory<AppDbContext> contextFactory, ILogger<PurchaseUnitService> logger)
 	{
 		ArgumentNullException.ThrowIfNull(contextFactory);
+		ArgumentNullException.ThrowIfNull(logger);
 
 		_contextFactory = contextFactory;
+		_logger = logger;
 	}
 
 
 	/// <inheritdoc />
 	public async Task<IEnumerable<PurchaseUnit>> GetAll()
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.PurchaseUnits.ToListAsync();
+			return await context.PurchaseUnits.ToListAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving all purchase units.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <exception cref="KeyNotFoundException">Thrown when no purchase unit with the specified ID is found.</exception>
 	public async Task<PurchaseUnit> Get(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		return await context.PurchaseUnits.FindAsync(id)
-			   ?? throw new KeyNotFoundException($"PurchaseUnit with Id {id} not found");
+			return await context.PurchaseUnits.FindAsync(id)
+				   ?? throw new KeyNotFoundException($"PurchaseUnit with Id {id} not found");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error retrieving purchase unit with Id {PurchaseUnitId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -58,13 +78,21 @@ public class PurchaseUnitService : IPurchaseUnitService
 			throw new UniqueConstraintException("Invalid PurchaseUnit", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
+		try
+		{
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-		var addedEntity = context.PurchaseUnits.Add(item);
+			var addedEntity = context.PurchaseUnits.Add(item);
 
-		await context.SaveChangesAsync();
+			await context.SaveChangesAsync();
 
-		return addedEntity.Entity;
+			return addedEntity.Entity;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error adding purchase unit.");
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
@@ -82,54 +110,76 @@ public class PurchaseUnitService : IPurchaseUnitService
 			throw new UniqueConstraintException("Invalid PurchaseUnit", validationErrors);
 		}
 
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var foundEntity = await context.PurchaseUnits.FindAsync(item.Id);
-
-		if (foundEntity is not null)
+		try
 		{
-			context.Entry(foundEntity).CurrentValues.SetValues(item);
+			await using var context = await _contextFactory.CreateDbContextAsync();
 
-			await context.SaveChangesAsync();
+			var foundEntity = await context.PurchaseUnits.FindAsync(item.Id);
+
+			if (foundEntity is not null)
+			{
+				context.Entry(foundEntity).CurrentValues.SetValues(item);
+				await context.SaveChangesAsync();
+			}
+
+			return foundEntity ?? throw new KeyNotFoundException($"PurchaseUnit with Id {item.Id} not found");
 		}
-
-		return foundEntity ?? throw new KeyNotFoundException($"PurchaseUnit with Id {item.Id} not found");
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error updating purchase unit with Id {PurchaseUnitId}.", item.Id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	/// <remarks>This operation is idempotent; if the ID does not exist, the method completes without error.</remarks>
 	public async Task Delete(int id)
 	{
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		var foundEntity = await context.PurchaseUnits.FirstOrDefaultAsync(p => p.Id == id);
-
-		if (foundEntity == null)
+		try
 		{
-			return;
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			var foundEntity = await context.PurchaseUnits.FirstOrDefaultAsync(p => p.Id == id);
+
+			if (foundEntity == null)
+			{
+				return;
+			}
+
+			context.PurchaseUnits.Remove(foundEntity);
+			await context.SaveChangesAsync();
 		}
-
-		context.PurchaseUnits.Remove(foundEntity);
-
-		await context.SaveChangesAsync();
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error deleting purchase unit with Id {PurchaseUnitId}.", id);
+			throw;
+		}
 	}
 
 	/// <inheritdoc />
 	public async Task<List<(string PropertyName, string ErrorMessage)>> ValidateItem(PurchaseUnit item)
 	{
-		var returnValue = new List<(string PropertyName, string ErrorMessage)>();
-
-		await using var context = await _contextFactory.CreateDbContextAsync();
-
-		//Unique index on name
-		var duplicate = await context.PurchaseUnits
-			.AnyAsync(p => p.Name == item.Name && p.Id != item.Id);
-
-		if (duplicate)
+		try
 		{
-			returnValue.Add((nameof(item.Name), "A purchase unit with this name already exists."));
-		}
+			var returnValue = new List<(string PropertyName, string ErrorMessage)>();
 
-		return returnValue;
+			await using var context = await _contextFactory.CreateDbContextAsync();
+
+			//Unique index on name
+			var duplicate = await context.PurchaseUnits
+				.AnyAsync(p => p.Name == item.Name && p.Id != item.Id);
+
+			if (duplicate)
+			{
+				returnValue.Add((nameof(item.Name), "A purchase unit with this name already exists."));
+			}
+
+			return returnValue;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error validating purchase unit.");
+			throw;
+		}
 	}
 }

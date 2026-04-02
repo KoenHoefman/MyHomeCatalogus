@@ -1,87 +1,125 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging.Abstractions;
 using MyHomeCatalogus.Shared.Domain;
 
 namespace MyHomeCatalogus.Data.Interceptors
 {
 	public sealed class StockItemAuditInterceptor : SaveChangesInterceptor
 	{
-
+		private readonly ILogger<StockItemAuditInterceptor> _logger;
 		private readonly List<StockItemAudit> _pendingAudits = new List<StockItemAudit>();
 
-		public override InterceptionResult<int> SavingChanges(DbContextEventData eventData,
-			InterceptionResult<int> result)
+		public StockItemAuditInterceptor(ILogger<StockItemAuditInterceptor>? logger = null)
 		{
-			var context = eventData.Context;
+			_logger = logger ?? NullLogger<StockItemAuditInterceptor>.Instance;
+		}
 
-			if (context is not null)
+		public override InterceptionResult<int> SavingChanges(DbContextEventData eventData,
+		InterceptionResult<int> result)
+		{
+			try
 			{
-				CreateAudits(context);
-			}
+				var context = eventData.Context;
 
-			return result;
+				if (context is not null)
+				{
+					CreateAudits(context);
+				}
+
+				return result;
+
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating audits during SavingChanges.");
+				throw;
+			}
 		}
 
 		public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
-			DbContextEventData eventData, InterceptionResult<int> result,
-			CancellationToken cancellationToken = default)
+		DbContextEventData eventData, InterceptionResult<int> result,
+		CancellationToken cancellationToken = default)
 		{
-			var context = eventData.Context;
-
-			if (context is not null)
+			try
 			{
-				CreateAudits(context);
-			}
+				var context = eventData.Context;
 
-			return await base.SavingChangesAsync(eventData, result, cancellationToken);
+				if (context is not null)
+				{
+					CreateAudits(context);
+				}
+
+				return await base.SavingChangesAsync(eventData, result, cancellationToken);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error creating audits during SavingChangesAsync.");
+				throw;
+			}
 		}
 
 		public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
 		{
-			var context = eventData.Context;
-			if (context is not null)
+			try
 			{
+				var context = eventData.Context;
+				if (context is not null)
+				{
+					var auditCount = ProcessPendingAudits(context);
+
+					if (auditCount > 0)
+					{
+						return base.SavedChanges(eventData, result + context.SaveChanges());
+					}
+				}
+
+				return result;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error processing audits during SavedChanges.");
+				throw;
+			}
+		}
+
+		public override async ValueTask<int> SavedChangesAsync(
+		SaveChangesCompletedEventData eventData, int result,
+		CancellationToken cancellationToken = default)
+		{
+			try
+			{
+				var context = eventData.Context;
+				if (context == null) return result;
+
 				var auditCount = ProcessPendingAudits(context);
 
 				if (auditCount > 0)
 				{
-					return base.SavedChanges(eventData, result + context.SaveChanges());
+					return result + await context.SaveChangesAsync(cancellationToken);
 				}
+
+				return result;
 			}
-
-			return result;
-		}
-
-		public override async ValueTask<int> SavedChangesAsync(
-			SaveChangesCompletedEventData eventData, int result,
-			CancellationToken cancellationToken = default)
-		{
-			var context = eventData.Context;
-			if (context == null) return result;
-
-			var auditCount = ProcessPendingAudits(context);
-
-			if (auditCount > 0)
+			catch (Exception ex)
 			{
-				return result + await context.SaveChangesAsync(cancellationToken);
+				_logger.LogError(ex, "Error processing audits during SavedChangesAsync.");
+				throw;
 			}
-
-			return result;
 		}
 
 		private void CreateAudits(DbContext context)
 		{
-			foreach (var entry in context.ChangeTracker.Entries().ToList())
-			{
+			var entries = context.ChangeTracker.Entries().ToList();
 
+			foreach (var entry in entries)
+			{
 				if (!(entry.Entity is StockItem stockItem)) continue;
 
 				if (entry.State == EntityState.Added)
 				{
 					if (stockItem.Quantity > 0)
 					{
-						//Id of the new StockItem isn't known yet.
-						//Store the object in the audit and save the audits afterwards
 						var stockItemAudit = new StockItemAudit
 						{
 							StockItem = stockItem,
@@ -91,6 +129,7 @@ namespace MyHomeCatalogus.Data.Interceptors
 						};
 
 						_pendingAudits.Add(stockItemAudit);
+						_logger.LogInformation("StockItemAuditInterceptor queued audit for added StockItem with temporary quantity {Quantity}.", stockItem.Quantity);
 					}
 				}
 				else if (entry.State == EntityState.Modified)
@@ -108,6 +147,7 @@ namespace MyHomeCatalogus.Data.Interceptors
 						};
 
 						context.Set<StockItemAudit>().Add(stockItemAudit);
+						_logger.LogInformation("StockItemAuditInterceptor created audit for modified StockItem {StockItemId}: {OldQuantity} -> {NewQuantity}.", stockItem.Id, stockItemAudit.OldQuantity, stockItemAudit.NewQuantity);
 					}
 				}
 			}
@@ -124,11 +164,12 @@ namespace MyHomeCatalogus.Data.Interceptors
 
 				context.Set<StockItemAudit>().Add(audit);
 				count++;
+				_logger.LogInformation("StockItemAuditInterceptor persisting pending audit for StockItemId {StockItemId}.", audit.StockItemId);
 			}
 
 			_pendingAudits.Clear();
+			_logger.LogDebug("StockItemAuditInterceptor persisted {PersistedCount} pending audit(s).", count);
 			return count;
 		}
-
 	}
 }

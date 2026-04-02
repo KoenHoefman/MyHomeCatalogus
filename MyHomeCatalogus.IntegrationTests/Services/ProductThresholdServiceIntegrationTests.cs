@@ -3,6 +3,8 @@ using MyHomeCatalogus.IntegrationTests.Base;
 using MyHomeCatalogus.Services;
 using MyHomeCatalogus.Shared.Domain;
 using MyHomeCatalogus.Shared.Exceptions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace MyHomeCatalogus.IntegrationTests.Services
@@ -12,7 +14,7 @@ namespace MyHomeCatalogus.IntegrationTests.Services
 		private ProductThresholdService CreateProductThresholdService()
 		{
 			var contextFactory = new DbContextFactoryMock(Options, Context.Database.GetDbConnection());
-			return new ProductThresholdService(contextFactory);
+			return new ProductThresholdService(contextFactory, NullLogger<ProductThresholdService>.Instance);
 		}
 
 		#region GetAll
